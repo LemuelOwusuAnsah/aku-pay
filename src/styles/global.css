@@ -1,0 +1,261 @@
+@import './animations.css';
+
+:root {
+  --aku-yellow: #FFD100;
+  --aku-yellow-dark: #E6BC00;
+  --aku-yellow-soft: #FFF6CC;
+  --aku-yellow-deep: #8A6A00;
+
+  --aku-blue: #0A3D91;
+  --aku-blue-light: #1E5BC6;
+  --aku-blue-soft: #E6EDFB;
+  --aku-blue-deep: #062A66;
+
+  --aku-green: #00A86B;
+  --aku-green-dark: #008A57;
+  --aku-green-soft: #E0F5EB;
+  --aku-green-deep: #005437;
+
+  --aku-white: #FFFFFF;
+  --aku-cream: #FFFBF0;
+  --aku-ink: #0B132B;
+  --aku-muted: #5A6478;
+  --aku-line: #E6EAF2;
+  --aku-bg: #F7F9FC;
+  --aku-danger: #E5484D;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 1px 2px rgba(11, 19, 43, 0.06);
+  --shadow-md: 0 6px 20px rgba(11, 19, 43, 0.08);
+  --shadow-lg: 0 20px 40px -12px rgba(11, 19, 43, 0.15);
+
+  --ease-out: cubic-bezier(0.2, 0.9, 0.3, 1);
+  --t-fast: 200ms;
+  --t-med: 350ms;
+  --t-slow: 500ms;
+}
+
+[data-theme="dark"] {
+  --aku-yellow: #FFD100;
+  --aku-yellow-dark: #E6BC00;
+  --aku-yellow-soft: #3A3208;
+  --aku-yellow-deep: #FFE766;
+
+  --aku-blue: #4E8AF5;
+  --aku-blue-light: #6EA3FF;
+  --aku-blue-soft: #101E3D;
+  --aku-blue-deep: #C7DAFF;
+
+  --aku-green: #2BD991;
+  --aku-green-dark: #1FB877;
+  --aku-green-soft: #0E2E20;
+  --aku-green-deep: #B7F0D5;
+
+  --aku-white: #0F172A;
+  --aku-cream: #131C33;
+  --aku-ink: #F1F5FB;
+  --aku-muted: #97A3BA;
+  --aku-line: #1E2A45;
+  --aku-bg: #0A0F1E;
+  --aku-danger: #F87171;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 40px -12px rgba(0, 0, 0, 0.6);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--aku-bg);
+  color: var(--aku-ink);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: background var(--t-med) var(--ease-out), color var(--t-med) var(--ease-out);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+@keyframes aku-slide-in-right {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes aku-slide-in-left {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes aku-fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.aku-slide-right { animation: aku-slide-in-right var(--t-med) var(--ease-out) both; }
+.aku-slide-left  { animation: aku-slide-in-left  var(--t-med) var(--ease-out) both; }
+.aku-fade-up     { animation: aku-fade-up        var(--t-med) var(--ease-out) both; }
+
+.aku-stagger > * {
+  opacity: 0;
+  animation: aku-fade-up var(--t-med) var(--ease-out) forwards;
+}
+.aku-stagger > *:nth-child(1) { animation-delay: 50ms; }
+.aku-stagger > *:nth-child(2) { animation-delay: 100ms; }
+.aku-stagger > *:nth-child(3) { animation-delay: 150ms; }
+.aku-stagger > *:nth-child(4) { animation-delay: 200ms; }
+.aku-stagger > *:nth-child(5) { animation-delay: 250ms; }
+.aku-stagger > *:nth-child(6) { animation-delay: 300ms; }
+
+.aku-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+.aku-card {
+  background: var(--aku-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-5);
+  transition: background var(--t-med) var(--ease-out);
+}
+
+.aku-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 12px 22px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 15px;
+  transition: transform var(--t-fast) var(--ease-out),
+              background var(--t-fast) var(--ease-out),
+              box-shadow var(--t-fast) var(--ease-out);
+}
+
+.aku-btn:hover { transform: translateY(-1px); }
+
+.aku-btn-primary {
+  background: var(--aku-blue);
+  color: white;
+}
+.aku-btn-primary:hover {
+  background: var(--aku-blue-light);
+  box-shadow: var(--shadow-md);
+}
+
+.aku-btn-yellow {
+  background: var(--aku-yellow);
+  color: #0B132B;
+}
+.aku-btn-yellow:hover { background: var(--aku-yellow-dark); }
+
+.aku-btn-green {
+  background: var(--aku-green);
+  color: white;
+}
+.aku-btn-green:hover { background: var(--aku-green-dark); }
+
+.aku-btn-ghost {
+  background: transparent;
+  color: var(--aku-blue);
+  border: 1.5px solid var(--aku-line);
+}
+.aku-btn-ghost:hover { border-color: var(--aku-blue); }
+
+.band-yellow { background: var(--aku-yellow-soft); color: var(--aku-ink); }
+.band-blue   { background: var(--aku-blue-soft);   color: var(--aku-ink); }
+.band-green  { background: var(--aku-green-soft);  color: var(--aku-ink); }
+.band-cream  { background: var(--aku-cream);       color: var(--aku-ink); }
+.band-white  { background: var(--aku-white);       color: var(--aku-ink); }
+
+.band-yellow-solid { background: var(--aku-yellow); color: #0B132B; }
+.band-blue-solid   { background: var(--aku-blue);   color: white; }
+.band-green-solid  { background: var(--aku-green);  color: white; }
+
+.aku-section {
+  padding: var(--space-8) 0;
+  transition: background var(--t-med) var(--ease-out), color var(--t-med) var(--ease-out);
+}
+
+.img-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.img-tile {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--t-med) var(--ease-out);
+}
+
+.img-tile:hover {
+  transform: translateY(-4px);
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(10, 61, 145, 0.85) 0%, rgba(10, 61, 145, 0.55) 45%, rgba(0, 168, 107, 0.35) 100%);
+  pointer-events: none;
+}
+
+[data-theme="dark"] .hero-overlay {
+  background: linear-gradient(120deg, rgba(2, 10, 30, 0.9) 0%, rgba(10, 61, 145, 0.7) 45%, rgba(0, 168, 107, 0.5) 100%);
+}
+
+.carousel-caption-custom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: var(--space-6);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent);
+  color: white;
+  text-align: left;
+}

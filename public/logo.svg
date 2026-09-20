@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="akuCoin" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0A3D91"/>
+      <stop offset="100%" stop-color="#1E5BC6"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="32" cy="32" r="30" fill="url(#akuCoin)"/>
+
+  <path d="M16 44 L32 16 L48 44 L40 44 L36 35 L28 35 L24 44 Z"
+        fill="#FFD100"/>
+
+  <path d="M22 46 C 32 52, 44 50, 50 42"
+        stroke="#00A86B"
+        stroke-width="3.5"
+        stroke-linecap="round"
+        fill="none"/>
+
+  <polyline points="44,42 50,42 50,48"
+            stroke="#00A86B"
+            stroke-width="3.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"/>
+</svg>
