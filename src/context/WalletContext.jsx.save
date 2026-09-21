@@ -1,0 +1,8 @@
+  const value = {
+    currency: activeCurrency.code,
+    currencyInfo: activeCurrency,
+    currencies: CURRENCIES,
+    setCurrency,
+    formatMoney,
+    balance: currentWallet.balance,
+    transactions: currentWallet.transactions,

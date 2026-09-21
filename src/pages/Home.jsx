@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import Reveal from '../components/Reveal.jsx';
 import Carousel from '../components/Carousel.jsx';
+import { useWallet } from '../context/WalletContext.jsx';
 
 const AUTHOR = {
   name: 'Lemuel Owusu-Ansah',
@@ -63,6 +64,11 @@ const carouselSlides = [
 ];
 
 export default function Home() {
+  const { balance, transactions, formatMoney, user, currencyInfo } = useWallet();
+
+  const recent = transactions.slice(0, 3);
+  const isSignedIn = Boolean(user);
+
   return (
     <div>
       <section
@@ -82,7 +88,10 @@ export default function Home() {
         />
         <div className="hero-overlay" style={{ zIndex: 1 }} />
 
-        <div className="aku-container" style={{ position: 'relative', zIndex: 2, padding: '80px 16px' }}>
+        <div
+          className="aku-container"
+          style={{ position: 'relative', zIndex: 2, padding: '80px 16px' }}
+        >
           <div className="row align-items-center g-5">
             <div className="col-12 col-lg-7">
               <p
@@ -129,7 +138,11 @@ export default function Home() {
                 className="d-flex flex-wrap gap-3 mt-5 aku-fade-up"
                 style={{ animationDelay: '240ms' }}
               >
-                <Link to="/auth" className="aku-btn aku-btn-yellow" style={{ padding: '14px 28px' }}>
+                <Link
+                  to="/auth"
+                  className="aku-btn aku-btn-yellow"
+                  style={{ padding: '14px 28px' }}
+                >
                   Create free account
                 </Link>
                 <Link
@@ -142,8 +155,130 @@ export default function Home() {
                     padding: '14px 28px',
                   }}
                 >
-                  See how it works
+                  Explore the app
                 </Link>
+              </div>
+            </div>
+
+            <div className="col-12 col-lg-5">
+              <div
+                className="aku-slide-right"
+                style={{
+                  background: 'var(--aku-blue)',
+                  borderRadius: 'var(--radius-xl)',
+                  padding: 28,
+                  color: 'white',
+                  boxShadow: 'var(--shadow-lg)',
+                }}
+              >
+                <div className="d-flex justify-content-between align-items-start">
+                  <div>
+                    <div style={{ fontSize: 13, opacity: 0.75 }}>
+                      {isSignedIn ? 'Your balance' : 'Starting balance'}
+                    </div>
+                    <div style={{ fontSize: 32, fontWeight: 800, marginTop: 6 }}>
+                      {formatMoney(balance)}
+                    </div>
+                  </div>
+                  <span
+                    style={{
+                      background: 'rgba(255,255,255,0.15)',
+                      padding: '4px 12px',
+                      borderRadius: 'var(--radius-pill)',
+                      fontSize: 12,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {currencyInfo.code} {currencyInfo.symbol}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    background: 'rgba(255,255,255,0.1)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: 16,
+                    marginTop: 20,
+                  }}
+                >
+                  <div className="d-flex justify-content-between mb-3">
+                    <span style={{ fontSize: 13, opacity: 0.75 }}>
+                      {isSignedIn ? 'Recent activity' : 'How it starts'}
+                    </span>
+                    {isSignedIn && (
+                      <Link
+                        to="/transactions"
+                        style={{ fontSize: 13, color: 'var(--aku-yellow)', fontWeight: 600 }}
+                      >
+                        View all
+                      </Link>
+                    )}
+                  </div>
+
+                  {!isSignedIn ? (
+                    <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6 }}>
+                      Sign in and receive your first payment. Your balance updates instantly — no
+                      fake numbers, just your real wallet.
+                    </div>
+                  ) : recent.length === 0 ? (
+                    <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)' }}>
+                      No activity yet. Receive money to get started.
+                    </div>
+                  ) : (
+                    recent.map((t, i) => (
+                      <div
+                        key={t.id}
+                        className="d-flex justify-content-between py-2"
+                        style={{
+                          borderBottom:
+                            i === recent.length - 1
+                              ? 'none'
+                              : '1px solid rgba(255,255,255,0.12)',
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 14,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            maxWidth: 180,
+                          }}
+                        >
+                          {t.title}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 14,
+                            color: t.amount > 0 ? 'var(--aku-green)' : 'var(--aku-yellow)',
+                            fontWeight: 600,
+                          }}
+                        >
+                          {t.amount > 0 ? '+' : '−'}
+                          {formatMoney(Math.abs(t.amount))}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {isSignedIn ? (
+                  <Link
+                    to="/wallet"
+                    className="aku-btn aku-btn-yellow w-100 mt-4"
+                    style={{ padding: 12 }}
+                  >
+                    Open wallet
+                  </Link>
+                ) : (
+                  <Link
+                    to="/auth"
+                    className="aku-btn aku-btn-yellow w-100 mt-4"
+                    style={{ padding: 12 }}
+                  >
+                    Sign in to start
+                  </Link>
+                )}
               </div>
             </div>
           </div>
@@ -183,13 +318,30 @@ export default function Home() {
           <Reveal group className="row g-4">
             {features.map((f) => (
               <div className="col-12 col-md-4" key={f.title}>
-                <div className="aku-card h-100 d-flex flex-column" style={{ padding: 0, overflow: 'hidden' }}>
+                <div
+                  className="aku-card h-100 d-flex flex-column"
+                  style={{ padding: 0, overflow: 'hidden' }}
+                >
                   <div style={{ height: 180, overflow: 'hidden' }}>
                     <img src={f.image} alt={f.title} className="img-cover" loading="lazy" />
                   </div>
-                  <div style={{ padding: 24, display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+                  <div
+                    style={{
+                      padding: 24,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      flexGrow: 1,
+                    }}
+                  >
                     <h5 style={{ fontWeight: 700, color: 'var(--aku-ink)' }}>{f.title}</h5>
-                    <p style={{ color: 'var(--aku-muted)', marginTop: 8, fontSize: 15, flexGrow: 1 }}>
+                    <p
+                      style={{
+                        color: 'var(--aku-muted)',
+                        marginTop: 8,
+                        fontSize: 15,
+                        flexGrow: 1,
+                      }}
+                    >
                       {f.text}
                     </p>
                     <Link
@@ -273,7 +425,14 @@ export default function Home() {
                 >
                   Built for how you actually live
                 </h2>
-                <p style={{ color: 'var(--aku-muted)', marginTop: 12, fontSize: 16, maxWidth: 520 }}>
+                <p
+                  style={{
+                    color: 'var(--aku-muted)',
+                    marginTop: 12,
+                    fontSize: 16,
+                    maxWidth: 520,
+                  }}
+                >
                   No forms, no queues, no hidden fees. Aku Pay keeps money simple so you can get on with your day.
                 </p>
 

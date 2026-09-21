@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useWallet } from '../context/WalletContext.jsx';
 
 const productLinks = [
   { to: '/wallet', label: 'Wallet' },
@@ -22,8 +23,24 @@ const AUTHOR = {
 };
 
 export default function Footer() {
+  const { user, signOut, resetDemo } = useWallet();
+  const navigate = useNavigate();
   const year = new Date().getFullYear();
   const logoSrc = `${import.meta.env.BASE_URL}logo.svg`;
+
+  const handleReset = () => {
+    const ok = window.confirm(
+      'Reset demo data? This will remove all accounts, balances and transactions from this browser.'
+    );
+    if (!ok) return;
+    resetDemo();
+    navigate('/');
+  };
+
+  const handleSignOut = () => {
+    signOut();
+    navigate('/');
+  };
 
   return (
     <footer
@@ -128,7 +145,7 @@ export default function Footer() {
         </div>
 
         <div
-          className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-2"
+          className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3"
           style={{
             borderTop: '1px solid rgba(255,255,255,0.12)',
             paddingTop: 24,
@@ -140,7 +157,42 @@ export default function Footer() {
           <span>
             © {year} <strong style={{ color: 'white' }}>{AUTHOR.name}</strong>. All rights reserved.
           </span>
-          <span>Apps by {AUTHOR.name}</span>
+
+          <div className="d-flex flex-wrap align-items-center gap-3">
+            <span>Apps by {AUTHOR.name}</span>
+
+            {user && (
+              <button
+                onClick={handleSignOut}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'rgba(255,255,255,0.85)',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  textDecoration: 'underline',
+                  padding: 0,
+                  cursor: 'pointer',
+                }}
+              >
+                Sign out
+              </button>
+            )}
+
+            <button
+              onClick={handleReset}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'rgba(255,255,255,0.5)',
+                fontSize: 13,
+                padding: 0,
+                cursor: 'pointer',
+              }}
+            >
+              Reset demo data
+            </button>
+          </div>
         </div>
       </div>
     </footer>

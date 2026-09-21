@@ -1,16 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Reveal from '../components/Reveal.jsx';
-
-const allTransactions = [
-  { id: 1, type: 'sent', name: 'Sent to Akosua', date: 'Today, 10:24', amount: -120 },
-  { id: 2, type: 'bill', name: 'ECG Ghana', date: 'Yesterday, 18:02', amount: -85 },
-  { id: 3, type: 'received', name: 'Kofi Boateng', date: 'Yesterday, 09:15', amount: 300 },
-  { id: 4, type: 'bill', name: 'Ghana Water Co.', date: 'Mon, 14:30', amount: -45 },
-  { id: 5, type: 'sent', name: 'Sent to Ama Owusu', date: 'Mon, 09:02', amount: -60 },
-  { id: 6, type: 'received', name: 'Yaw Darko', date: 'Sun, 20:11', amount: 500 },
-  { id: 7, type: 'bill', name: 'Fibre Broadband', date: 'Sun, 12:00', amount: -180 },
-  { id: 8, type: 'sent', name: 'Sent to Kwame', date: 'Fri, 16:48', amount: -75 },
-];
+import { useWallet } from '../context/WalletContext.jsx';
 
 const filters = [
   { id: 'all', label: 'All', color: 'var(--aku-blue)' },
@@ -25,21 +16,37 @@ const icons = {
   bill: { glyph: '✓', bg: 'var(--aku-yellow-soft)', color: 'var(--aku-yellow-deep)' },
 };
 
+function formatDate(iso) {
+  try {
+    return new Date(iso).toLocaleDateString(undefined, {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch (e) {
+    return iso;
+  }
+}
+
 export default function Transactions() {
+  const { transactions, formatMoney } = useWallet();
   const [filter, setFilter] = useState('all');
 
-  const visible =
-    filter === 'all'
-      ? allTransactions
-      : allTransactions.filter((t) => t.type === filter);
+  const visible = useMemo(() => {
+    if (filter === 'all') return transactions;
+    return transactions.filter((t) => t.type === filter);
+  }, [transactions, filter]);
 
-  const totalIn = allTransactions
-    .filter((t) => t.amount > 0)
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const totalOut = allTransactions
-    .filter((t) => t.amount < 0)
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const { totalIn, totalOut } = useMemo(() => {
+    let inSum = 0;
+    let outSum = 0;
+    for (const t of transactions) {
+      if (t.amount > 0) inSum += t.amount;
+      else outSum += Math.abs(t.amount);
+    }
+    return { totalIn: inSum, totalOut: outSum };
+  }, [transactions]);
 
   return (
     <div>
@@ -116,7 +123,7 @@ export default function Transactions() {
                     marginTop: 4,
                   }}
                 >
-                  +₵{totalIn}
+                  +{formatMoney(totalIn)}
                 </div>
               </div>
             </div>
@@ -131,7 +138,7 @@ export default function Transactions() {
                     marginTop: 4,
                   }}
                 >
-                  −₵{totalOut}
+                  −{formatMoney(totalOut)}
                 </div>
               </div>
             </div>
@@ -146,7 +153,7 @@ export default function Transactions() {
                     marginTop: 4,
                   }}
                 >
-                  {allTransactions.length}
+                  {transactions.length}
                 </div>
               </div>
             </div>
@@ -185,68 +192,115 @@ export default function Transactions() {
 
       <section className="aku-section band-cream">
         <div className="aku-container">
-          <div className="aku-card" style={{ padding: 0, overflow: 'hidden' }}>
-            {visible.length === 0 ? (
-              <div style={{ padding: 60, textAlign: 'center', color: 'var(--aku-muted)' }}>
-                No transactions in this view.
+          {transactions.length === 0 ? (
+            <Reveal>
+              <div
+                className="aku-card text-center"
+                style={{ padding: 56, maxWidth: 520, margin: '0 auto' }}
+              >
+                <div
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: '50%',
+                    background: 'var(--aku-bg)',
+                    display: 'grid',
+                    placeItems: 'center',
+                    margin: '0 auto 20px',
+                    fontSize: 30,
+                  }}
+                >
+                  🧾
+                </div>
+                <h3 style={{ fontWeight: 800, color: 'var(--aku-ink)' }}>
+                  No transactions yet
+                </h3>
+                <p style={{ color: 'var(--aku-muted)', marginTop: 8, fontSize: 14 }}>
+                  Once you send, receive, or pay a bill, your history will appear here.
+                </p>
+                <div className="d-flex flex-wrap gap-2 justify-content-center mt-4">
+                  <Link to="/wallet" className="aku-btn aku-btn-primary">
+                    Go to wallet
+                  </Link>
+                  <Link to="/send" className="aku-btn aku-btn-ghost">
+                    Send money
+                  </Link>
+                </div>
               </div>
-            ) : (
-              visible.map((t, i) => {
-                const ic = icons[t.type];
-                return (
-                  <Reveal key={t.id} delay={i * 40}>
-                    <div
-                      className="d-flex justify-content-between align-items-center px-4 py-3"
-                      style={{
-                        borderBottom:
-                          i === visible.length - 1 ? 'none' : '1px solid var(--aku-line)',
-                        transition: 'background var(--t-fast) var(--ease-out)',
-                      }}
-                    >
-                      <div className="d-flex align-items-center gap-3">
-                        <div
-                          style={{
-                            width: 44,
-                            height: 44,
-                            borderRadius: 12,
-                            background: ic.bg,
-                            color: ic.color,
-                            display: 'grid',
-                            placeItems: 'center',
-                            fontWeight: 700,
-                            fontSize: 17,
-                          }}
-                        >
-                          {ic.glyph}
-                        </div>
-                        <div>
-                          <div
-                            style={{
-                              fontWeight: 600,
-                              color: 'var(--aku-ink)',
-                              fontSize: 15,
-                            }}
-                          >
-                            {t.name}
-                          </div>
-                          <div style={{ fontSize: 12, color: 'var(--aku-muted)' }}>{t.date}</div>
-                        </div>
-                      </div>
+            </Reveal>
+          ) : (
+            <div className="aku-card" style={{ padding: 0, overflow: 'hidden' }}>
+              {visible.length === 0 ? (
+                <div
+                  style={{
+                    padding: 48,
+                    textAlign: 'center',
+                    color: 'var(--aku-muted)',
+                  }}
+                >
+                  No {filter} transactions yet.
+                </div>
+              ) : (
+                visible.map((t, i) => {
+                  const ic = icons[t.type] || icons.sent;
+                  return (
+                    <Reveal key={t.id} delay={i * 40}>
                       <div
+                        className="d-flex justify-content-between align-items-center px-4 py-3"
                         style={{
-                          fontWeight: 700,
-                          fontSize: 16,
-                          color: t.amount > 0 ? 'var(--aku-green)' : 'var(--aku-ink)',
+                          borderBottom:
+                            i === visible.length - 1 ? 'none' : '1px solid var(--aku-line)',
                         }}
                       >
-                        {t.amount > 0 ? '+' : '−'}₵{Math.abs(t.amount)}
+                        <div className="d-flex align-items-center gap-3">
+                          <div
+                            style={{
+                              width: 44,
+                              height: 44,
+                              borderRadius: 12,
+                              background: ic.bg,
+                              color: ic.color,
+                              display: 'grid',
+                              placeItems: 'center',
+                              fontWeight: 700,
+                              fontSize: 17,
+                            }}
+                          >
+                            {ic.glyph}
+                          </div>
+                          <div>
+                            <div
+                              style={{
+                                fontWeight: 600,
+                                color: 'var(--aku-ink)',
+                                fontSize: 15,
+                              }}
+                            >
+                              {t.title}
+                            </div>
+                            <div style={{ fontSize: 12, color: 'var(--aku-muted)' }}>
+                              {t.subtitle ? `${t.subtitle} · ` : ''}
+                              {formatDate(t.date)}
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          style={{
+                            fontWeight: 700,
+                            fontSize: 16,
+                            color: t.amount > 0 ? 'var(--aku-green)' : 'var(--aku-ink)',
+                          }}
+                        >
+                          {t.amount > 0 ? '+' : '−'}
+                          {formatMoney(Math.abs(t.amount))}
+                        </div>
                       </div>
-                    </div>
-                  </Reveal>
-                );
-              })
-            )}
-          </div>
+                    </Reveal>
+                  );
+                })
+              )}
+            </div>
+          )}
         </div>
       </section>
     </div>

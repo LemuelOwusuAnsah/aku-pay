@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Reveal from '../components/Reveal.jsx';
+import { useWallet } from '../context/WalletContext.jsx';
 
 const quickActions = [
   {
+    key: 'send',
     to: '/send',
     label: 'Send money',
     icon: '→',
@@ -10,6 +13,7 @@ const quickActions = [
       'https://images.unsplash.com/photo-1556742393-d75f468bfcb0?auto=format&fit=crop&w=600&q=80',
   },
   {
+    key: 'bills',
     to: '/bills',
     label: 'Pay bill',
     icon: '✓',
@@ -17,13 +21,14 @@ const quickActions = [
       'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=600&q=80',
   },
   {
-    to: '/wallet',
-    label: 'Top up',
+    key: 'receive',
+    label: 'Receive money',
     icon: '+',
     image:
       'https://images.unsplash.com/photo-1601597111158-2fceff292cdc?auto=format&fit=crop&w=600&q=80',
   },
   {
+    key: 'history',
     to: '/transactions',
     label: 'History',
     icon: '↗',
@@ -32,14 +37,39 @@ const quickActions = [
   },
 ];
 
-const recent = [
-  { name: 'Sent to Akosua', date: 'Today, 10:24', amount: -120 },
-  { name: 'Bill payment — ECG', date: 'Yesterday, 18:02', amount: -85 },
-  { name: 'Received from Kofi', date: 'Yesterday, 09:15', amount: 300 },
-  { name: 'Airtime top-up', date: 'Mon, 14:30', amount: -20 },
-];
-
 export default function Wallet() {
+  const {
+    balance,
+    transactions,
+    formatMoney,
+    receiveMoney,
+    user,
+    currencyInfo,
+  } = useWallet();
+
+  const [receiveOpen, setReceiveOpen] = useState(false);
+  const [receiveAmount, setReceiveAmount] = useState('');
+  const [receiveError, setReceiveError] = useState('');
+
+  const recent = transactions.slice(0, 4);
+
+  const handleReceive = (e) => {
+    e.preventDefault();
+    const result = receiveMoney({
+      amount: receiveAmount,
+      from: 'Someone',
+    });
+    if (!result.ok) {
+      setReceiveError(result.error);
+      return;
+    }
+    setReceiveAmount('');
+    setReceiveError('');
+    setReceiveOpen(false);
+  };
+
+  const isZero = balance === 0;
+
   return (
     <div>
       <section
@@ -63,17 +93,19 @@ export default function Wallet() {
         <div className="aku-container aku-fade-up" style={{ position: 'relative', zIndex: 2, padding: '48px 16px' }}>
           <div className="d-flex flex-wrap justify-content-between align-items-end gap-3">
             <div>
-              <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)' }}>Hi, Lemuel 👋</div>
+              <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)' }}>
+                {user ? `Hi, ${user.name?.split(' ')[0] || 'there'} 👋` : 'Welcome 👋'}
+              </div>
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 6 }}>
                 Available balance
               </div>
               <div style={{ fontSize: 44, fontWeight: 800, marginTop: 4 }}>
-                ₵ 2,450.80
+                {formatMoney(balance)}
               </div>
               <div className="d-flex flex-wrap gap-2 mt-3">
                 <span
                   style={{
-                    background: 'var(--aku-green)',
+                    background: isZero ? 'rgba(255,255,255,0.2)' : 'var(--aku-green)',
                     color: 'white',
                     padding: '4px 12px',
                     borderRadius: 'var(--radius-pill)',
@@ -81,7 +113,7 @@ export default function Wallet() {
                     fontWeight: 600,
                   }}
                 >
-                  ● Active
+                  ● {isZero ? 'Empty wallet' : 'Active'}
                 </span>
                 <span
                   style={{
@@ -92,17 +124,115 @@ export default function Wallet() {
                     fontWeight: 600,
                   }}
                 >
-                  Aku ID: AKU-8842-1190
+                  Currency: {currencyInfo.code} {currencyInfo.symbol}
                 </span>
               </div>
             </div>
 
-            <Link to="/send" className="aku-btn aku-btn-yellow" style={{ padding: '12px 24px' }}>
-              Send money
-            </Link>
+            <div className="d-flex flex-wrap gap-2">
+              <button
+                onClick={() => {
+                  setReceiveOpen(true);
+                  setReceiveError('');
+                }}
+                className="aku-btn aku-btn-yellow"
+                style={{ padding: '12px 24px' }}
+              >
+                Receive money
+              </button>
+              <Link
+                to="/send"
+                className="aku-btn"
+                style={{
+                  padding: '12px 24px',
+                  background: 'rgba(255,255,255,0.15)',
+                  color: 'white',
+                  border: '1px solid rgba(255,255,255,0.35)',
+                }}
+              >
+                Send money
+              </Link>
+            </div>
           </div>
         </div>
       </section>
+
+      {receiveOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(11,19,43,0.6)',
+            zIndex: 1200,
+            display: 'grid',
+            placeItems: 'center',
+            padding: 16,
+          }}
+          onClick={() => setReceiveOpen(false)}
+        >
+          <div
+            className="aku-card aku-fade-up"
+            style={{ maxWidth: 420, width: '100%', padding: 28 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ fontWeight: 800, color: 'var(--aku-ink)', fontSize: 22 }}>
+              Receive money
+            </h3>
+            <p style={{ color: 'var(--aku-muted)', fontSize: 14, marginTop: 6 }}>
+              Enter the amount someone is sending you. For this demo, it's added instantly.
+            </p>
+
+            <form onSubmit={handleReceive} className="mt-4">
+              <label
+                className="form-label"
+                style={{ fontWeight: 600, color: 'var(--aku-ink)' }}
+              >
+                Amount ({currencyInfo.symbol})
+              </label>
+              <input
+                type="number"
+                className="form-control"
+                placeholder="0.00"
+                min="1"
+                step="0.01"
+                value={receiveAmount}
+                onChange={(e) => {
+                  setReceiveAmount(e.target.value);
+                  setReceiveError('');
+                }}
+                style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)' }}
+                autoFocus
+              />
+
+              {receiveError && (
+                <p style={{ color: 'var(--aku-danger)', fontSize: 13, marginTop: 8 }}>
+                  {receiveError}
+                </p>
+              )}
+
+              <div className="d-flex gap-2 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setReceiveOpen(false)}
+                  className="aku-btn aku-btn-ghost flex-fill"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="aku-btn aku-btn-primary flex-fill"
+                  disabled={!receiveAmount || Number(receiveAmount) <= 0}
+                  style={{
+                    opacity: !receiveAmount || Number(receiveAmount) <= 0 ? 0.5 : 1,
+                  }}
+                >
+                  Add {receiveAmount ? formatMoney(Number(receiveAmount)) : 'money'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <section className="aku-section band-green">
         <div className="aku-container">
@@ -116,20 +246,17 @@ export default function Wallet() {
           </Reveal>
 
           <Reveal group className="row g-4 mt-2">
-            {quickActions.map((q) => (
-              <div className="col-6 col-md-3" key={q.label}>
-                <Link
-                  to={q.to}
-                  className="aku-card d-block h-100 text-center"
-                  style={{ padding: 0, overflow: 'hidden' }}
-                >
+            {quickActions.map((q) => {
+              const content = (
+                <>
                   <div style={{ height: 96, overflow: 'hidden', position: 'relative' }}>
                     <img src={q.image} alt="" className="img-cover" loading="lazy" />
                     <div
                       style={{
                         position: 'absolute',
                         inset: 0,
-                        background: 'linear-gradient(180deg, rgba(10,61,145,0.1), rgba(10,61,145,0.5))',
+                        background:
+                          'linear-gradient(180deg, rgba(10,61,145,0.1), rgba(10,61,145,0.5))',
                       }}
                     />
                     <div
@@ -151,12 +278,44 @@ export default function Wallet() {
                       {q.icon}
                     </div>
                   </div>
-                  <div style={{ padding: '16px 12px', fontWeight: 600, color: 'var(--aku-ink)', fontSize: 14 }}>
+                  <div
+                    style={{
+                      padding: '16px 12px',
+                      fontWeight: 600,
+                      color: 'var(--aku-ink)',
+                      fontSize: 14,
+                    }}
+                  >
                     {q.label}
                   </div>
-                </Link>
-              </div>
-            ))}
+                </>
+              );
+
+              return (
+                <div className="col-6 col-md-3" key={q.key}>
+                  {q.key === 'receive' ? (
+                    <button
+                      onClick={() => {
+                        setReceiveOpen(true);
+                        setReceiveError('');
+                      }}
+                      className="aku-card d-block h-100 w-100 text-center"
+                      style={{ padding: 0, overflow: 'hidden', cursor: 'pointer' }}
+                    >
+                      {content}
+                    </button>
+                  ) : (
+                    <Link
+                      to={q.to}
+                      className="aku-card d-block h-100 text-center"
+                      style={{ padding: 0, overflow: 'hidden' }}
+                    >
+                      {content}
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
           </Reveal>
         </div>
       </section>
@@ -179,46 +338,94 @@ export default function Wallet() {
                     </Link>
                   </div>
 
-                  {recent.map((t, i) => (
+                  {recent.length === 0 ? (
                     <div
-                      key={t.name}
-                      className="d-flex justify-content-between align-items-center py-3"
                       style={{
-                        borderBottom: i === recent.length - 1 ? 'none' : '1px solid var(--aku-line)',
+                        padding: '40px 20px',
+                        textAlign: 'center',
+                        color: 'var(--aku-muted)',
                       }}
                     >
-                      <div className="d-flex align-items-center gap-3">
-                        <div
-                          style={{
-                            width: 42,
-                            height: 42,
-                            borderRadius: 12,
-                            background: t.amount > 0 ? 'var(--aku-green-soft)' : 'var(--aku-blue-soft)',
-                            color: t.amount > 0 ? 'var(--aku-green-deep)' : 'var(--aku-blue)',
-                            display: 'grid',
-                            placeItems: 'center',
-                            fontWeight: 700,
-                          }}
-                        >
-                          {t.amount > 0 ? '↓' : '↑'}
-                        </div>
-                        <div>
-                          <div style={{ fontWeight: 600, color: 'var(--aku-ink)', fontSize: 14 }}>
-                            {t.name}
-                          </div>
-                          <div style={{ fontSize: 12, color: 'var(--aku-muted)' }}>{t.date}</div>
-                        </div>
-                      </div>
                       <div
                         style={{
-                          fontWeight: 700,
-                          color: t.amount > 0 ? 'var(--aku-green)' : 'var(--aku-ink)',
+                          width: 56,
+                          height: 56,
+                          borderRadius: '50%',
+                          background: 'var(--aku-bg)',
+                          display: 'grid',
+                          placeItems: 'center',
+                          margin: '0 auto 16px',
+                          fontSize: 24,
                         }}
                       >
-                        {t.amount > 0 ? '+' : '−'}₵{Math.abs(t.amount)}
+                        🧾
                       </div>
+                      <p style={{ fontWeight: 600, color: 'var(--aku-ink)', marginBottom: 6 }}>
+                        No transactions yet
+                      </p>
+                      <p style={{ fontSize: 14 }}>
+                        Your activity will appear here after your first send or receive.
+                      </p>
                     </div>
-                  ))}
+                  ) : (
+                    recent.map((t, i) => (
+                      <div
+                        key={t.id}
+                        className="d-flex justify-content-between align-items-center py-3"
+                        style={{
+                          borderBottom:
+                            i === recent.length - 1 ? 'none' : '1px solid var(--aku-line)',
+                        }}
+                      >
+                        <div className="d-flex align-items-center gap-3">
+                          <div
+                            style={{
+                              width: 42,
+                              height: 42,
+                              borderRadius: 12,
+                              background:
+                                t.amount > 0 ? 'var(--aku-green-soft)' : 'var(--aku-blue-soft)',
+                              color:
+                                t.amount > 0 ? 'var(--aku-green-deep)' : 'var(--aku-blue)',
+                              display: 'grid',
+                              placeItems: 'center',
+                              fontWeight: 700,
+                            }}
+                          >
+                            {t.amount > 0 ? '↓' : '↑'}
+                          </div>
+                          <div>
+                            <div
+                              style={{
+                                fontWeight: 600,
+                                color: 'var(--aku-ink)',
+                                fontSize: 14,
+                              }}
+                            >
+                              {t.title}
+                            </div>
+                            <div style={{ fontSize: 12, color: 'var(--aku-muted)' }}>
+                              {new Date(t.date).toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          style={{
+                            fontWeight: 700,
+                            color: t.amount > 0 ? 'var(--aku-green)' : 'var(--aku-ink)',
+                          }}
+                        >
+                          {t.amount > 0 ? '+' : '−'}
+                          {formatMoney(Math.abs(t.amount))}
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </Reveal>
             </div>
@@ -269,49 +476,18 @@ export default function Wallet() {
                     letterSpacing: 0.5,
                   }}
                 >
-                  This month
+                  Your wallet
                 </span>
                 <h2 style={{ fontSize: 30, fontWeight: 800, color: 'var(--aku-ink)', marginTop: 12 }}>
-                  You've moved ₵1,240 this month
+                  {isZero
+                    ? 'Your wallet is ready'
+                    : `You're holding ${formatMoney(balance)}`}
                 </h2>
                 <p style={{ color: 'var(--aku-muted)', marginTop: 12 }}>
-                  Out of that, ₵540 went to bills and ₵700 to friends and family. Keep it up — you're on track.
+                  {isZero
+                    ? 'No balance yet. Receive money from a friend, or send your first payment to see activity appear here.'
+                    : `Everything you receive and spend updates here in real time. Currency: ${currencyInfo.name}.`}
                 </p>
-
-                <div
-                  style={{
-                    marginTop: 24,
-                    background: 'var(--aku-white)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: 20,
-                  }}
-                >
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span style={{ fontSize: 14, color: 'var(--aku-muted)' }}>Spent vs last month</span>
-                    <span style={{ fontWeight: 700, color: 'var(--aku-green)' }}>−12%</span>
-                  </div>
-                  <div
-                    style={{
-                      height: 10,
-                      borderRadius: 999,
-                      background: 'var(--aku-line)',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: '68%',
-                        height: '100%',
-                        background: 'var(--aku-blue)',
-                        borderRadius: 999,
-                      }}
-                    />
-                  </div>
-                  <div className="d-flex justify-content-between mt-2" style={{ fontSize: 12, color: 'var(--aku-muted)' }}>
-                    <span>Lower</span>
-                    <span>Higher</span>
-                  </div>
-                </div>
               </Reveal>
             </div>
           </div>

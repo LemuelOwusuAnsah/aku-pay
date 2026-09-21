@@ -1,46 +1,135 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Reveal from '../components/Reveal.jsx';
+import { useWallet } from '../context/WalletContext.jsx';
 
 const DEMO_NAME = 'Lemuel Owusu-Ansah';
 const DEMO_PHONE = '0245791297';
 const DEMO_EMAIL = 'hello@lemuelowusuansah.org';
 
 export default function Auth() {
-  const [mode, setMode] = useState('signin');
+  const { accounts, user, signUp, signIn, signOut, formatMoney } = useWallet();
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const nextPath = params.get('next') || '/wallet';
+  const wantsSignup = params.get('mode') === 'signup';
+  const isAddFlow = params.get('add') === '1';
+
+  const isFirstTime = accounts.length === 0;
+
+  const initialMode = useMemo(() => {
+    if (wantsSignup) return 'signup';
+    if (isFirstTime) return 'signup';
+    return 'signin';
+  }, [wantsSignup, isFirstTime]);
+
+  const [mode, setMode] = useState(initialMode);
   const [form, setForm] = useState({ name: '', phone: '', email: '', password: '' });
-  const [done, setDone] = useState(false);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
   const [animKey, setAnimKey] = useState(0);
+  const [justSignedIn, setJustSignedIn] = useState(null);
 
   const logoSrc = `${import.meta.env.BASE_URL}logo.svg`;
+  const logoWhiteSrc = `${import.meta.env.BASE_URL}logo-white.svg`;
 
-  const update = (field) => (e) => setForm({ ...form, [field]: e.target.value });
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
+
+  useEffect(() => {
+    if (user && !justSignedIn) {
+      setJustSignedIn(user);
+    }
+  }, [user, justSignedIn]);
+
+  const update = (field) => (e) => {
+    setForm({ ...form, [field]: e.target.value });
+    setError('');
+  };
 
   const switchMode = (next) => {
     if (next === mode) return;
     setMode(next);
     setAnimKey((k) => k + 1);
     setForm({ name: '', phone: '', email: '', password: '' });
-    setDone(false);
+    setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.email || !form.password) return;
-    if (mode === 'signup' && !form.name) return;
-    setDone(true);
+    setError('');
+    setBusy(true);
+
+    try {
+      const result =
+        mode === 'signup'
+          ? await signUp({
+              name: form.name,
+              phone: form.phone,
+              email: form.email,
+              password: form.password,
+            })
+          : await signIn({ email: form.email, password: form.password });
+
+      if (!result.ok) {
+        setError(result.error || 'Something went wrong.');
+        setBusy(false);
+        return;
+      }
+      setJustSignedIn(result.user);
+      navigate(nextPath, { replace: true });
+    } catch (err) {
+      setError('Unexpected error. Try again.');
+      setBusy(false);
+    }
   };
 
-  if (done) {
-    const displayName = form.name || DEMO_NAME;
-    const displayEmail = form.email || DEMO_EMAIL;
+  const handleSignOut = () => {
+    signOut();
+    setForm({ name: '', phone: '', email: '', password: '' });
+    setError('');
+    setJustSignedIn(null);
+  };
 
+  const banner = (() => {
+    if (isAddFlow) {
+      return {
+        tone: 'yellow',
+        text: (
+          <>
+            <strong>Add another account.</strong> Your current session will switch to the new one.
+          </>
+        ),
+      };
+    }
+    if (isFirstTime) {
+      return {
+        tone: 'yellow',
+        text: (
+          <>
+            <strong>Welcome to Aku Pay.</strong> Create your first wallet below — it takes under a minute.
+          </>
+        ),
+      };
+    }
+    return {
+      tone: 'blue',
+      text: (
+        <>
+          <strong>Welcome back.</strong> Sign in to continue where you left off.
+        </>
+      ),
+    };
+  })();
+
+  if (justSignedIn) {
     return (
       <div>
         <section
           style={{
             position: 'relative',
-            minHeight: 420,
+            minHeight: 380,
             display: 'flex',
             alignItems: 'center',
             overflow: 'hidden',
@@ -88,12 +177,10 @@ export default function Auth() {
                 ✓
               </div>
               <h2 style={{ fontWeight: 800, color: 'var(--aku-ink)' }}>
-                {mode === 'signin' ? 'Signed in' : 'Account created'}
+                Welcome, {justSignedIn.name.split(' ')[0]}
               </h2>
               <p style={{ color: 'var(--aku-muted)', marginTop: 8, fontSize: 14 }}>
-                {mode === 'signin'
-                  ? `Welcome back, ${displayEmail}.`
-                  : `Welcome to Aku Pay, ${displayName}.`}
+                You're signed in. Your wallet is ready.
               </p>
 
               <div
@@ -108,25 +195,38 @@ export default function Auth() {
               >
                 <div className="d-flex justify-content-between py-1">
                   <span style={{ color: 'var(--aku-muted)' }}>Name</span>
-                  <span style={{ fontWeight: 600 }}>{displayName}</span>
+                  <span style={{ fontWeight: 600 }}>{justSignedIn.name}</span>
                 </div>
-                <div className="d-flex justify-content-between py-1">
-                  <span style={{ color: 'var(--aku-muted)' }}>Phone</span>
-                  <span style={{ fontWeight: 600 }}>{form.phone || DEMO_PHONE}</span>
-                </div>
+                {justSignedIn.phone && (
+                  <div className="d-flex justify-content-between py-1">
+                    <span style={{ color: 'var(--aku-muted)' }}>Phone</span>
+                    <span style={{ fontWeight: 600 }}>{justSignedIn.phone}</span>
+                  </div>
+                )}
                 <div className="d-flex justify-content-between py-1">
                   <span style={{ color: 'var(--aku-muted)' }}>Email</span>
-                  <span style={{ fontWeight: 600 }}>{displayEmail}</span>
+                  <span style={{ fontWeight: 600 }}>{justSignedIn.email}</span>
+                </div>
+                <div
+                  className="d-flex justify-content-between py-1 mt-2"
+                  style={{ borderTop: '1px solid var(--aku-line)', paddingTop: 8 }}
+                >
+                  <span style={{ color: 'var(--aku-muted)' }}>Balance</span>
+                  <span style={{ fontWeight: 700 }}>{formatMoney(0)}</span>
                 </div>
               </div>
 
-              <Link
-                to="/wallet"
-                className="aku-btn aku-btn-primary w-100 mt-4"
-                style={{ padding: 14 }}
-              >
-                Continue to wallet
-              </Link>
+              <div className="d-flex flex-wrap gap-2 justify-content-center mt-4">
+                <button className="aku-btn aku-btn-ghost" onClick={handleSignOut}>
+                  Sign out
+                </button>
+                <button
+                  className="aku-btn aku-btn-primary"
+                  onClick={() => navigate('/wallet')}
+                >
+                  Continue to wallet
+                </button>
+              </div>
             </div>
           </div>
         </section>
@@ -169,13 +269,7 @@ export default function Auth() {
                     }}
                   >
                     <div className="d-flex align-items-center gap-2">
-                      <img
-                        src={logoSrc}
-                        alt="Aku Pay"
-                        width={40}
-                        height={40}
-                        style={{ filter: 'brightness(0) invert(1)' }}
-                      />
+                      <img src={logoWhiteSrc} alt="Aku Pay" width={40} height={40} />
                       <span style={{ fontWeight: 800, fontSize: 22 }}>
                         Aku<span style={{ color: 'var(--aku-yellow)' }}>Pay</span>
                       </span>
@@ -236,7 +330,26 @@ export default function Auth() {
 
                 <Reveal delay={80}>
                   <div
-                    className="d-flex p-1 my-4"
+                    className="mt-4 mb-4"
+                    style={{
+                      background:
+                        banner.tone === 'yellow'
+                          ? 'var(--aku-yellow-soft)'
+                          : 'var(--aku-blue-soft)',
+                      borderLeft: `4px solid ${
+                        banner.tone === 'yellow' ? 'var(--aku-yellow)' : 'var(--aku-blue)'
+                      }`,
+                      borderRadius: 'var(--radius-md)',
+                      padding: 12,
+                      fontSize: 13,
+                      color: 'var(--aku-ink)',
+                    }}
+                  >
+                    {banner.text}
+                  </div>
+
+                  <div
+                    className="d-flex p-1 mb-4"
                     style={{ background: 'var(--aku-bg)', borderRadius: 'var(--radius-pill)' }}
                   >
                     {[
@@ -260,16 +373,21 @@ export default function Auth() {
                     ))}
                   </div>
 
-                  <p
-                    style={{
-                      fontSize: 12,
-                      color: 'var(--aku-muted)',
-                      textAlign: 'center',
-                      marginBottom: 20,
-                    }}
-                  >
-                    Try it with <strong style={{ color: 'var(--aku-ink)' }}>{DEMO_EMAIL}</strong> · any password
-                  </p>
+                  {nextPath && nextPath !== '/wallet' && (
+                    <div
+                      className="mb-4"
+                      style={{
+                        background: 'var(--aku-yellow-soft)',
+                        borderLeft: '4px solid var(--aku-yellow)',
+                        borderRadius: 'var(--radius-md)',
+                        padding: 12,
+                        fontSize: 13,
+                        color: 'var(--aku-ink)',
+                      }}
+                    >
+                      Sign in to continue to <strong>{nextPath}</strong>.
+                    </div>
+                  )}
 
                   <form key={animKey} onSubmit={handleSubmit} className="aku-slide-right">
                     {mode === 'signup' && (
@@ -296,7 +414,10 @@ export default function Auth() {
                             className="form-label"
                             style={{ fontWeight: 600, color: 'var(--aku-ink)' }}
                           >
-                            Phone <span style={{ color: 'var(--aku-muted)', fontWeight: 400 }}>(optional)</span>
+                            Phone{' '}
+                            <span style={{ color: 'var(--aku-muted)', fontWeight: 400 }}>
+                              (optional)
+                            </span>
                           </label>
                           <input
                             type="tel"
@@ -337,28 +458,61 @@ export default function Auth() {
                       <input
                         type="password"
                         className="form-control"
-                        placeholder="••••••••"
+                        placeholder="At least 8 characters"
                         value={form.password}
                         onChange={update('password')}
                         style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)' }}
                       />
+                      {mode === 'signup' && (
+                        <p
+                          style={{
+                            fontSize: 12,
+                            color: 'var(--aku-muted)',
+                            marginTop: 6,
+                          }}
+                        >
+                          Minimum 8 characters.
+                        </p>
+                      )}
                     </div>
+
+                    {error && (
+                      <p
+                        style={{
+                          color: 'var(--aku-danger)',
+                          fontSize: 13,
+                          marginBottom: 12,
+                        }}
+                      >
+                        {error}
+                      </p>
+                    )}
 
                     <button
                       type="submit"
                       className="aku-btn aku-btn-primary w-100"
                       disabled={
-                        !form.email || !form.password || (mode === 'signup' && !form.name)
+                        busy ||
+                        !form.email ||
+                        !form.password ||
+                        (mode === 'signup' && !form.name)
                       }
                       style={{
                         opacity:
-                          !form.email || !form.password || (mode === 'signup' && !form.name)
+                          busy ||
+                          !form.email ||
+                          !form.password ||
+                          (mode === 'signup' && !form.name)
                             ? 0.5
                             : 1,
                         padding: 14,
                       }}
                     >
-                      {mode === 'signin' ? 'Sign in' : 'Create account'}
+                      {busy
+                        ? 'Please wait…'
+                        : mode === 'signin'
+                        ? 'Sign in'
+                        : 'Create account'}
                     </button>
                   </form>
 
@@ -382,7 +536,7 @@ export default function Auth() {
                         padding: 0,
                       }}
                     >
-                      {mode === 'signin' ? 'Sign up' : 'Sign in'}
+                      {mode === 'signin' ? 'Create one' : 'Sign in'}
                     </button>
                   </p>
                 </Reveal>
@@ -398,7 +552,7 @@ export default function Auth() {
               marginTop: 20,
             }}
           >
-            Demo only — no real accounts are created. Apps by {DEMO_NAME}.
+            Demo only — accounts are stored locally in your browser. Apps by {DEMO_NAME}.
           </p>
         </div>
       </section>

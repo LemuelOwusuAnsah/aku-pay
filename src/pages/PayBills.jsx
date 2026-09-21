@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Reveal from '../components/Reveal.jsx';
+import { useWallet } from '../context/WalletContext.jsx';
 
 const categories = [
   {
@@ -38,31 +39,58 @@ const categories = [
 ];
 
 export default function PayBills() {
+  const { balance, formatMoney, payBill, currencyInfo } = useWallet();
+
   const [category, setCategory] = useState(null);
   const [form, setForm] = useState({ biller: '', account: '', amount: '' });
+  const [error, setError] = useState('');
   const [paid, setPaid] = useState(false);
+  const [paidRecord, setPaidRecord] = useState(null);
 
-  const update = (field) => (e) => setForm({ ...form, [field]: e.target.value });
+  const update = (field) => (e) => {
+    setForm({ ...form, [field]: e.target.value });
+    setError('');
+  };
 
   const pickCategory = (c) => {
     setCategory(c.id);
     setForm({ ...form, biller: c.biller });
+    setError('');
   };
+
+  const amount = Number(form.amount) || 0;
+  const canSubmit =
+    form.biller && form.account && amount > 0 && amount <= balance;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.biller || !form.account || !form.amount) return;
+    const cat = categories.find((c) => c.id === category);
+    const result = payBill({
+      biller: form.biller,
+      account: form.account,
+      amount: form.amount,
+      category: cat ? cat.label : '',
+    });
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setPaidRecord({
+      category: cat ? cat.label : '',
+      biller: form.biller,
+      account: form.account,
+      amount,
+    });
     setPaid(true);
   };
 
-  if (paid) {
-    const cat = categories.find((c) => c.id === category);
+  if (paid && paidRecord) {
     return (
       <div>
         <section
           style={{
             position: 'relative',
-            minHeight: 420,
+            minHeight: 380,
             display: 'flex',
             alignItems: 'center',
             overflow: 'hidden',
@@ -111,7 +139,7 @@ export default function PayBills() {
               </div>
               <h2 style={{ fontWeight: 800, color: 'var(--aku-ink)' }}>Bill paid</h2>
               <p style={{ color: 'var(--aku-muted)', marginTop: 8 }}>
-                ₵ {form.amount} paid to {form.biller}.
+                {formatMoney(paidRecord.amount)} paid to {paidRecord.biller}.
               </p>
 
               <div
@@ -124,21 +152,30 @@ export default function PayBills() {
                   fontSize: 14,
                 }}
               >
-                <div className="d-flex justify-content-between py-1">
-                  <span style={{ color: 'var(--aku-muted)' }}>Category</span>
-                  <span style={{ fontWeight: 600 }}>{cat ? cat.label : '—'}</span>
-                </div>
+                {paidRecord.category && (
+                  <div className="d-flex justify-content-between py-1">
+                    <span style={{ color: 'var(--aku-muted)' }}>Category</span>
+                    <span style={{ fontWeight: 600 }}>{paidRecord.category}</span>
+                  </div>
+                )}
                 <div className="d-flex justify-content-between py-1">
                   <span style={{ color: 'var(--aku-muted)' }}>Biller</span>
-                  <span style={{ fontWeight: 600 }}>{form.biller}</span>
+                  <span style={{ fontWeight: 600 }}>{paidRecord.biller}</span>
                 </div>
                 <div className="d-flex justify-content-between py-1">
                   <span style={{ color: 'var(--aku-muted)' }}>Account</span>
-                  <span style={{ fontWeight: 600 }}>{form.account}</span>
+                  <span style={{ fontWeight: 600 }}>{paidRecord.account}</span>
                 </div>
                 <div className="d-flex justify-content-between py-1">
                   <span style={{ color: 'var(--aku-muted)' }}>Amount</span>
-                  <span style={{ fontWeight: 600 }}>₵ {form.amount}</span>
+                  <span style={{ fontWeight: 600 }}>{formatMoney(paidRecord.amount)}</span>
+                </div>
+                <div
+                  className="d-flex justify-content-between py-1 mt-2"
+                  style={{ borderTop: '1px solid var(--aku-line)', paddingTop: 8 }}
+                >
+                  <span style={{ color: 'var(--aku-muted)' }}>New balance</span>
+                  <span style={{ fontWeight: 700 }}>{formatMoney(balance)}</span>
                 </div>
               </div>
 
@@ -147,6 +184,7 @@ export default function PayBills() {
                   className="aku-btn aku-btn-ghost"
                   onClick={() => {
                     setPaid(false);
+                    setPaidRecord(null);
                     setCategory(null);
                     setForm({ biller: '', account: '', amount: '' });
                   }}
@@ -201,17 +239,59 @@ export default function PayBills() {
                 </p>
 
                 <div className="d-flex flex-wrap gap-3 mt-4">
-                  {[
-                    { k: '4', v: 'bill types' },
-                    { k: 'Instant', v: 'confirmation' },
-                    { k: '24/7', v: 'always available' },
-                  ].map((s) => (
-                    <div key={s.v} className="aku-card" style={{ padding: '14px 18px', minWidth: 130 }}>
-                      <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--aku-blue)' }}>{s.k}</div>
-                      <div style={{ fontSize: 12, color: 'var(--aku-muted)', marginTop: 2 }}>{s.v}</div>
+                  <div className="aku-card" style={{ padding: '14px 18px', minWidth: 130 }}>
+                    <div style={{ fontSize: 12, color: 'var(--aku-muted)' }}>Your balance</div>
+                    <div
+                      style={{
+                        fontSize: 20,
+                        fontWeight: 800,
+                        color: 'var(--aku-blue)',
+                        marginTop: 2,
+                      }}
+                    >
+                      {formatMoney(balance)}
                     </div>
-                  ))}
+                  </div>
+                  <div className="aku-card" style={{ padding: '14px 18px', minWidth: 130 }}>
+                    <div style={{ fontSize: 12, color: 'var(--aku-muted)' }}>Currency</div>
+                    <div
+                      style={{
+                        fontSize: 20,
+                        fontWeight: 800,
+                        color: 'var(--aku-blue)',
+                        marginTop: 2,
+                      }}
+                    >
+                      {currencyInfo.code} {currencyInfo.symbol}
+                    </div>
+                  </div>
                 </div>
+
+                {balance === 0 && (
+                  <div
+                    className="mt-4 d-flex align-items-start gap-2"
+                    style={{
+                      background: 'var(--aku-white)',
+                      border: '1px solid var(--aku-line)',
+                      borderLeft: '4px solid var(--aku-yellow)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: 14,
+                      maxWidth: 460,
+                    }}
+                  >
+                    <span style={{ fontSize: 18 }}>💡</span>
+                    <div style={{ fontSize: 14, color: 'var(--aku-ink)' }}>
+                      Your wallet is empty.{' '}
+                      <Link
+                        to="/wallet"
+                        style={{ color: 'var(--aku-blue)', fontWeight: 700 }}
+                      >
+                        Receive money
+                      </Link>{' '}
+                      first to pay your first bill.
+                    </div>
+                  </div>
+                )}
               </Reveal>
             </div>
 
@@ -294,7 +374,14 @@ export default function PayBills() {
         <div className="aku-container">
           <div className="mx-auto" style={{ maxWidth: 560 }}>
             <Reveal>
-              <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--aku-ink)', marginBottom: 16 }}>
+              <h2
+                style={{
+                  fontSize: 22,
+                  fontWeight: 800,
+                  color: 'var(--aku-ink)',
+                  marginBottom: 16,
+                }}
+              >
                 Bill details
               </h2>
             </Reveal>
@@ -303,7 +390,10 @@ export default function PayBills() {
               <div className="aku-card">
                 <form onSubmit={handleSubmit}>
                   <div className="mb-3">
-                    <label className="form-label" style={{ fontWeight: 600, color: 'var(--aku-ink)' }}>
+                    <label
+                      className="form-label"
+                      style={{ fontWeight: 600, color: 'var(--aku-ink)' }}
+                    >
                       Biller
                     </label>
                     <input
@@ -317,7 +407,10 @@ export default function PayBills() {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label" style={{ fontWeight: 600, color: 'var(--aku-ink)' }}>
+                    <label
+                      className="form-label"
+                      style={{ fontWeight: 600, color: 'var(--aku-ink)' }}
+                    >
                       Account / meter number
                     </label>
                     <input
@@ -331,8 +424,11 @@ export default function PayBills() {
                   </div>
 
                   <div className="mb-4">
-                    <label className="form-label" style={{ fontWeight: 600, color: 'var(--aku-ink)' }}>
-                      Amount (₵)
+                    <label
+                      className="form-label"
+                      style={{ fontWeight: 600, color: 'var(--aku-ink)' }}
+                    >
+                      Amount ({currencyInfo.symbol})
                     </label>
                     <input
                       type="number"
@@ -340,22 +436,45 @@ export default function PayBills() {
                       placeholder="0.00"
                       value={form.amount}
                       onChange={update('amount')}
-                      min="1"
+                      min="0"
                       step="0.01"
                       style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)' }}
                     />
+                    <div
+                      className="d-flex justify-content-between mt-2"
+                      style={{ fontSize: 12, color: 'var(--aku-muted)' }}
+                    >
+                      <span>Balance: {formatMoney(balance)}</span>
+                      {amount > balance && balance >= 0 && (
+                        <span style={{ color: 'var(--aku-danger)', fontWeight: 600 }}>
+                          Insufficient balance
+                        </span>
+                      )}
+                    </div>
                   </div>
+
+                  {error && (
+                    <p
+                      style={{
+                        color: 'var(--aku-danger)',
+                        fontSize: 13,
+                        marginBottom: 12,
+                      }}
+                    >
+                      {error}
+                    </p>
+                  )}
 
                   <button
                     type="submit"
                     className="aku-btn aku-btn-primary w-100"
-                    disabled={!form.biller || !form.account || !form.amount}
+                    disabled={!canSubmit}
                     style={{
-                      opacity: !form.biller || !form.account || !form.amount ? 0.5 : 1,
+                      opacity: canSubmit ? 1 : 0.5,
                       padding: 14,
                     }}
                   >
-                    Pay ₵{form.amount || '0'}
+                    Pay {formatMoney(amount || 0)}
                   </button>
                 </form>
               </div>

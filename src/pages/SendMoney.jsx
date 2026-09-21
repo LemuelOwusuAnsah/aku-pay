@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Reveal from '../components/Reveal.jsx';
+import { useWallet } from '../context/WalletContext.jsx';
 
 const contacts = [
   { name: 'Akosua Mensah', id: 'AKU-2210-4471', initial: 'A' },
@@ -9,28 +10,55 @@ const contacts = [
 ];
 
 export default function SendMoney() {
-  const [form, setForm] = useState({ recipient: '', id: '', amount: '', note: '' });
-  const [sent, setSent] = useState(false);
+  const { balance, formatMoney, sendMoney, currencyInfo } = useWallet();
 
-  const update = (field) => (e) => setForm({ ...form, [field]: e.target.value });
+  const [form, setForm] = useState({ recipient: '', id: '', amount: '', note: '' });
+  const [error, setError] = useState('');
+  const [sent, setSent] = useState(false);
+  const [sentRecord, setSentRecord] = useState(null);
+
+  const update = (field) => (e) => {
+    setForm({ ...form, [field]: e.target.value });
+    setError('');
+  };
 
   const pickContact = (c) => {
     setForm({ ...form, recipient: c.name, id: c.id });
+    setError('');
   };
+
+  const amount = Number(form.amount) || 0;
+  const canSubmit = form.recipient && amount > 0 && amount <= balance;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.recipient || !form.amount) return;
+    const result = sendMoney({
+      recipient: form.recipient,
+      recipientId: form.id,
+      amount: form.amount,
+      note: form.note,
+    });
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setSentRecord({
+      recipient: form.recipient,
+      id: form.id,
+      amount,
+      note: form.note,
+    });
     setSent(true);
   };
 
-  if (sent) {
+  if (sent && sentRecord) {
+    const newBalance = balance;
     return (
       <div>
         <section
           style={{
             position: 'relative',
-            minHeight: 420,
+            minHeight: 380,
             display: 'flex',
             alignItems: 'center',
             overflow: 'hidden',
@@ -45,7 +73,16 @@ export default function SendMoney() {
           <div className="hero-overlay" style={{ zIndex: 1 }} />
         </section>
 
-        <section className="aku-section band-green" style={{ marginTop: -120, position: 'relative', zIndex: 2, background: 'transparent' }}>
+        <section
+          className="aku-section"
+          style={{
+            marginTop: -120,
+            position: 'relative',
+            zIndex: 2,
+            background: 'transparent',
+            paddingTop: 0,
+          }}
+        >
           <div className="aku-container">
             <div
               className="aku-card text-center mx-auto aku-fade-up"
@@ -70,7 +107,7 @@ export default function SendMoney() {
               </div>
               <h2 style={{ fontWeight: 800, color: 'var(--aku-ink)' }}>Money sent</h2>
               <p style={{ color: 'var(--aku-muted)', marginTop: 8 }}>
-                ₵ {form.amount} was sent to {form.recipient}.
+                {formatMoney(sentRecord.amount)} sent to {sentRecord.recipient}.
               </p>
 
               <div
@@ -85,22 +122,31 @@ export default function SendMoney() {
               >
                 <div className="d-flex justify-content-between py-1">
                   <span style={{ color: 'var(--aku-muted)' }}>Recipient</span>
-                  <span style={{ fontWeight: 600 }}>{form.recipient}</span>
+                  <span style={{ fontWeight: 600 }}>{sentRecord.recipient}</span>
                 </div>
-                <div className="d-flex justify-content-between py-1">
-                  <span style={{ color: 'var(--aku-muted)' }}>Aku ID</span>
-                  <span style={{ fontWeight: 600 }}>{form.id}</span>
-                </div>
-                <div className="d-flex justify-content-between py-1">
-                  <span style={{ color: 'var(--aku-muted)' }}>Amount</span>
-                  <span style={{ fontWeight: 600 }}>₵ {form.amount}</span>
-                </div>
-                {form.note && (
+                {sentRecord.id && (
                   <div className="d-flex justify-content-between py-1">
-                    <span style={{ color: 'var(--aku-muted)' }}>Note</span>
-                    <span style={{ fontWeight: 600 }}>{form.note}</span>
+                    <span style={{ color: 'var(--aku-muted)' }}>Aku ID</span>
+                    <span style={{ fontWeight: 600 }}>{sentRecord.id}</span>
                   </div>
                 )}
+                <div className="d-flex justify-content-between py-1">
+                  <span style={{ color: 'var(--aku-muted)' }}>Amount</span>
+                  <span style={{ fontWeight: 600 }}>{formatMoney(sentRecord.amount)}</span>
+                </div>
+                {sentRecord.note && (
+                  <div className="d-flex justify-content-between py-1">
+                    <span style={{ color: 'var(--aku-muted)' }}>Note</span>
+                    <span style={{ fontWeight: 600 }}>{sentRecord.note}</span>
+                  </div>
+                )}
+                <div
+                  className="d-flex justify-content-between py-1 mt-2"
+                  style={{ borderTop: '1px solid var(--aku-line)', paddingTop: 8 }}
+                >
+                  <span style={{ color: 'var(--aku-muted)' }}>New balance</span>
+                  <span style={{ fontWeight: 700 }}>{formatMoney(newBalance)}</span>
+                </div>
               </div>
 
               <div className="d-flex flex-wrap gap-2 justify-content-center mt-4">
@@ -108,6 +154,7 @@ export default function SendMoney() {
                   className="aku-btn aku-btn-ghost"
                   onClick={() => {
                     setSent(false);
+                    setSentRecord(null);
                     setForm({ recipient: '', id: '', amount: '', note: '' });
                   }}
                 >
@@ -161,25 +208,59 @@ export default function SendMoney() {
                 </p>
 
                 <div className="d-flex flex-wrap gap-3 mt-4">
-                  {[
-                    { k: '0', v: 'fees' },
-                    { k: '<5s', v: 'average send time' },
-                    { k: '24/7', v: 'always on' },
-                  ].map((s) => (
+                  <div className="aku-card" style={{ padding: '14px 18px', minWidth: 130 }}>
+                    <div style={{ fontSize: 12, color: 'var(--aku-muted)' }}>Your balance</div>
                     <div
-                      key={s.v}
-                      className="aku-card"
-                      style={{ padding: '14px 18px', minWidth: 130 }}
+                      style={{
+                        fontSize: 20,
+                        fontWeight: 800,
+                        color: 'var(--aku-blue)',
+                        marginTop: 2,
+                      }}
                     >
-                      <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--aku-blue)' }}>
-                        {s.k}
-                      </div>
-                      <div style={{ fontSize: 12, color: 'var(--aku-muted)', marginTop: 2 }}>
-                        {s.v}
-                      </div>
+                      {formatMoney(balance)}
                     </div>
-                  ))}
+                  </div>
+                  <div className="aku-card" style={{ padding: '14px 18px', minWidth: 130 }}>
+                    <div style={{ fontSize: 12, color: 'var(--aku-muted)' }}>Currency</div>
+                    <div
+                      style={{
+                        fontSize: 20,
+                        fontWeight: 800,
+                        color: 'var(--aku-blue)',
+                        marginTop: 2,
+                      }}
+                    >
+                      {currencyInfo.code} {currencyInfo.symbol}
+                    </div>
+                  </div>
                 </div>
+
+                {balance === 0 && (
+                  <div
+                    className="mt-4 d-flex align-items-start gap-2"
+                    style={{
+                      background: 'var(--aku-yellow-soft)',
+                      border: '1px solid var(--aku-line)',
+                      borderLeft: '4px solid var(--aku-yellow)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: 14,
+                      maxWidth: 460,
+                    }}
+                  >
+                    <span style={{ fontSize: 18 }}>💡</span>
+                    <div style={{ fontSize: 14, color: 'var(--aku-ink)' }}>
+                      Your wallet is empty.{' '}
+                      <Link
+                        to="/wallet"
+                        style={{ color: 'var(--aku-blue)', fontWeight: 700 }}
+                      >
+                        Receive money
+                      </Link>{' '}
+                      first to send your first transfer.
+                    </div>
+                  </div>
+                )}
               </Reveal>
             </div>
 
@@ -258,7 +339,10 @@ export default function SendMoney() {
               <div className="aku-card">
                 <form onSubmit={handleSubmit}>
                   <div className="mb-3">
-                    <label className="form-label" style={{ fontWeight: 600, color: 'var(--aku-ink)' }}>
+                    <label
+                      className="form-label"
+                      style={{ fontWeight: 600, color: 'var(--aku-ink)' }}
+                    >
                       Recipient name
                     </label>
                     <input
@@ -272,7 +356,10 @@ export default function SendMoney() {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label" style={{ fontWeight: 600, color: 'var(--aku-ink)' }}>
+                    <label
+                      className="form-label"
+                      style={{ fontWeight: 600, color: 'var(--aku-ink)' }}
+                    >
                       Aku ID or phone
                     </label>
                     <input
@@ -286,8 +373,11 @@ export default function SendMoney() {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label" style={{ fontWeight: 600, color: 'var(--aku-ink)' }}>
-                      Amount (₵)
+                    <label
+                      className="form-label"
+                      style={{ fontWeight: 600, color: 'var(--aku-ink)' }}
+                    >
+                      Amount ({currencyInfo.symbol})
                     </label>
                     <input
                       type="number"
@@ -295,15 +385,32 @@ export default function SendMoney() {
                       placeholder="0.00"
                       value={form.amount}
                       onChange={update('amount')}
-                      min="1"
+                      min="0"
                       step="0.01"
                       style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)' }}
                     />
+                    <div
+                      className="d-flex justify-content-between mt-2"
+                      style={{ fontSize: 12, color: 'var(--aku-muted)' }}
+                    >
+                      <span>Balance: {formatMoney(balance)}</span>
+                      {amount > balance && balance >= 0 && (
+                        <span style={{ color: 'var(--aku-danger)', fontWeight: 600 }}>
+                          Insufficient balance
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="mb-4">
-                    <label className="form-label" style={{ fontWeight: 600, color: 'var(--aku-ink)' }}>
-                      Note <span style={{ color: 'var(--aku-muted)', fontWeight: 400 }}>(optional)</span>
+                    <label
+                      className="form-label"
+                      style={{ fontWeight: 600, color: 'var(--aku-ink)' }}
+                    >
+                      Note{' '}
+                      <span style={{ color: 'var(--aku-muted)', fontWeight: 400 }}>
+                        (optional)
+                      </span>
                     </label>
                     <input
                       type="text"
@@ -315,16 +422,28 @@ export default function SendMoney() {
                     />
                   </div>
 
+                  {error && (
+                    <p
+                      style={{
+                        color: 'var(--aku-danger)',
+                        fontSize: 13,
+                        marginBottom: 12,
+                      }}
+                    >
+                      {error}
+                    </p>
+                  )}
+
                   <button
                     type="submit"
                     className="aku-btn aku-btn-primary w-100"
-                    disabled={!form.recipient || !form.amount}
+                    disabled={!canSubmit}
                     style={{
-                      opacity: !form.recipient || !form.amount ? 0.5 : 1,
+                      opacity: canSubmit ? 1 : 0.5,
                       padding: 14,
                     }}
                   >
-                    Send ₵{form.amount || '0'}
+                    Send {formatMoney(amount || 0)}
                   </button>
                 </form>
               </div>
