@@ -23,6 +23,7 @@ const AUTHOR = {
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const logoSrc = `${import.meta.env.BASE_URL}logo.svg`;
 
   return (
     <footer
@@ -66,13 +67,7 @@ export default function Footer() {
         <div className="row g-4">
           <div className="col-12 col-md-5">
             <div className="d-flex align-items-center gap-2 mb-3">
-              <img
-                src="/logo.svg"
-                alt="Aku Pay"
-                width={36}
-                height={36}
-                style={{ filter: 'brightness(0) invert(1)' }}
-              />
+              <img src={logoSrc} alt="Aku Pay" width={36} height={36} />
               <span style={{ fontWeight: 800, fontSize: 20, color: 'white' }}>
                 Aku<span style={{ color: 'var(--aku-yellow)' }}>Pay</span>
               </span>

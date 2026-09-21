@@ -60,7 +60,12 @@ export default function Navbar() {
     <header style={headerStyle}>
       <div className="aku-container d-flex align-items-center justify-content-between py-3">
         <Link to="/" className="d-flex align-items-center gap-2" onClick={() => setMenuOpen(false)}>
-          <img src="/logo.svg" alt="Aku Pay" width={38} height={38} />
+          <img
+            src={`${import.meta.env.BASE_URL}logo.svg`}
+            alt="Aku Pay"
+            width={38}
+            height={38}
+          />
           <span style={{ fontWeight: 800, fontSize: 20, color: 'var(--aku-blue)' }}>
             Aku<span style={{ color: 'var(--aku-green)' }}>Pay</span>
           </span>

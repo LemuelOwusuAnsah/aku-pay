@@ -51,6 +51,8 @@ const roadmap = [
 ];
 
 export default function About() {
+  const logoSrc = `${import.meta.env.BASE_URL}logo.svg`;
+
   useEffect(() => {
     const prevTitle = document.title;
     document.title = 'About — Aku Pay';
@@ -219,7 +221,7 @@ export default function About() {
                   style={{ padding: 32 }}
                 >
                   <img
-                    src="/logo.svg"
+                    src={logoSrc}
                     alt="Aku Pay"
                     width={72}
                     height={72}
