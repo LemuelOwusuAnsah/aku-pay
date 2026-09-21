@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Aku Pay</title>
+    <script>
+      (function () {
+        var segmentCount = 1;
+        var l = window.location;
+        var basePath = '/aku-pay/';
+        var path = l.pathname;
+
+        if (path.indexOf(basePath) === 0) {
+          path = path.slice(basePath.length - 1);
+        }
+
+        l.replace(
+          l.protocol +
+            '//' +
+            l.hostname +
+            (l.port ? ':' + l.port : '') +
+            basePath +
+            '?/' +
+            path.replace(/^\//, '').replace(/\/$/, '') +
+            (l.search ? '&' + l.search.slice(1) : '') +
+            l.hash
+        );
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecting…</p>
+  </body>
+</html>
