@@ -7,6 +7,7 @@ import SendMoney from './pages/SendMoney.jsx';
 import PayBills from './pages/PayBills.jsx';
 import Transactions from './pages/Transactions.jsx';
 import Auth from './pages/Auth.jsx';
+import About from './pages/About.jsx';
 
 export default function App() {
   const location = useLocation();
@@ -23,6 +24,7 @@ export default function App() {
             <Route path="/bills" element={<PayBills />} />
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/about" element={<About />} />
           </Routes>
         </div>
       </main>

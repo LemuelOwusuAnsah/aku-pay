@@ -8,7 +8,7 @@ const productLinks = [
 ];
 
 const companyLinks = [
-  { to: '/', label: 'About' },
+  { to: '/about', label: 'About' },
   { to: '/', label: 'Security' },
   { to: '/', label: 'Support' },
   { to: '/auth', label: 'Sign in' },

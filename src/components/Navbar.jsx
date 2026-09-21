@@ -7,6 +7,7 @@ const links = [
   { to: '/send', label: 'Send' },
   { to: '/bills', label: 'Bills' },
   { to: '/transactions', label: 'History' },
+  { to: '/about', label: 'About' },
 ];
 
 export default function Navbar() {
