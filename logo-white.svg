@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <circle cx="32" cy="32" r="30" fill="#FFFFFF"/>
+
+  <path d="M16 44 L32 16 L48 44 L40 44 L36 35 L28 35 L24 44 Z"
+        fill="#0A3D91"/>
+
+  <path d="M22 46 C 32 52, 44 50, 50 42"
+        stroke="#00A86B"
+        stroke-width="3.5"
+        stroke-linecap="round"
+        fill="none"/>
+
+  <polyline points="44,42 50,42 50,48"
+            stroke="#00A86B"
+            stroke-width="3.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"/>
+</svg>
