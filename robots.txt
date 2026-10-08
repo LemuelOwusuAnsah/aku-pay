@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://lemuelowusuansah.github.io/aku-pay/sitemap.xml
+Sitemap: https://akupay.lemuelowusuansah.org/sitemap.xml
