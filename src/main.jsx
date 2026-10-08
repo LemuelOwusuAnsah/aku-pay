@@ -9,7 +9,7 @@ import SessionGuard from './components/SessionGuard.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter basename="/aku-pay">
+    <BrowserRouter>
       <WalletProvider>
         <SessionGuard>
           <App />
