@@ -1,11 +1,52 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import Reveal from '../components/Reveal.jsx';
 import { useWallet } from '../context/WalletContext.jsx';
 
 const DEMO_NAME = 'Lemuel Owusu-Ansah';
 const DEMO_PHONE = '0245791297';
 const DEMO_EMAIL = 'hello@lemuelowusuansah.org';
+
+function PasswordInput({ value, onChange, placeholder, autoComplete }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div style={{ position: 'relative' }}>
+      <input
+        type={show ? 'text' : 'password'}
+        className="form-control"
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        autoComplete={autoComplete}
+        style={{
+          padding: '12px 44px 12px 16px',
+          borderRadius: 'var(--radius-md)',
+        }}
+      />
+      <button
+        type="button"
+        onClick={() => setShow((v) => !v)}
+        aria-label={show ? 'Hide password' : 'Show password'}
+        style={{
+          position: 'absolute',
+          top: '50%',
+          right: 12,
+          transform: 'translateY(-50%)',
+          background: 'transparent',
+          border: 'none',
+          padding: 4,
+          color: 'var(--aku-muted)',
+          display: 'grid',
+          placeItems: 'center',
+          cursor: 'pointer',
+        }}
+      >
+        {show ? <EyeOff size={16} /> : <Eye size={16} />}
+      </button>
+    </div>
+  );
+}
 
 export default function Auth() {
   const { accounts, user, signUp, signIn, resetPassword, signOut, formatMoney } = useWallet();
@@ -142,35 +183,18 @@ export default function Auth() {
     setJustSignedIn(null);
   };
 
-  const banner = (() => {
-    if (isAddFlow) {
-      return {
-        tone: 'yellow',
-        text: (
-          <>
-            <strong>Add another account.</strong> Your current session will switch to the new one.
-          </>
-        ),
-      };
-    }
-    if (isFirstTime) {
-      return {
-        tone: 'yellow',
-        text: (
-          <>
-            <strong>Welcome to Aku Pay.</strong> Create your first wallet below — it takes under a minute.
-          </>
-        ),
-      };
-    }
-    return {
-      tone: 'blue',
-      text: (
-        <>
-          <strong>Welcome back.</strong> Sign in to continue where you left off.
-        </>
-      ),
-    };
+  const heading = (() => {
+    if (mode === 'reset') return 'Reset your password';
+    if (mode === 'signin') return 'Welcome back';
+    return 'Create your wallet';
+  })();
+
+  const subheading = (() => {
+    if (mode === 'reset') return 'Enter the email on your account and pick a new password.';
+    if (isAddFlow) return 'Create a new account. Your current session will switch.';
+    if (isFirstTime) return 'Create your first wallet — it takes under a minute.';
+    if (mode === 'signin') return 'Sign in to continue where you left off.';
+    return 'Set up your Aku Pay wallet.';
   })();
 
   if (justSignedIn) {
@@ -370,64 +394,16 @@ export default function Auth() {
                 style={{ padding: 48 }}
               >
                 <Reveal>
-                  <h3 style={{ fontWeight: 800, color: 'var(--aku-ink)' }}>
-                    {mode === 'reset'
-                      ? 'Reset your password'
-                      : mode === 'signin'
-                      ? 'Welcome back'
-                      : 'Create your wallet'}
-                  </h3>
+                  <h3 style={{ fontWeight: 800, color: 'var(--aku-ink)' }}>{heading}</h3>
                   <p style={{ color: 'var(--aku-muted)', marginTop: 6, fontSize: 14 }}>
-                    {mode === 'reset'
-                      ? 'Set a new password for your account.'
-                      : mode === 'signin'
-                      ? 'Sign in to continue where you left off.'
-                      : 'Takes less than a minute.'}
+                    {subheading}
                   </p>
                 </Reveal>
 
                 <Reveal delay={80}>
-                  {mode !== 'reset' && (
-                    <div
-                      className="mt-4 mb-4"
-                      style={{
-                        background:
-                          banner.tone === 'yellow'
-                            ? 'var(--aku-yellow-soft)'
-                            : 'var(--aku-blue-soft)',
-                        borderLeft: `4px solid ${
-                          banner.tone === 'yellow' ? 'var(--aku-yellow)' : 'var(--aku-blue)'
-                        }`,
-                        borderRadius: 'var(--radius-md)',
-                        padding: 12,
-                        fontSize: 13,
-                        color: 'var(--aku-ink)',
-                      }}
-                    >
-                      {banner.text}
-                    </div>
-                  )}
-
-                  {mode === 'reset' && !resetDone && (
-                    <div
-                      className="mt-4 mb-4"
-                      style={{
-                        background: 'var(--aku-blue-soft)',
-                        borderLeft: '4px solid var(--aku-blue)',
-                        borderRadius: 'var(--radius-md)',
-                        padding: 12,
-                        fontSize: 13,
-                        color: 'var(--aku-ink)',
-                      }}
-                    >
-                      Enter the email on your account and pick a new password. In production, this
-                      would send a reset link to your inbox.
-                    </div>
-                  )}
-
                   {showTabs && (
                     <div
-                      className="d-flex p-1 mb-4"
+                      className="d-flex p-1 my-4"
                       style={{ background: 'var(--aku-bg)', borderRadius: 'var(--radius-pill)' }}
                     >
                       {[
@@ -453,19 +429,15 @@ export default function Auth() {
                   )}
 
                   {nextPath && nextPath !== '/wallet' && mode !== 'reset' && (
-                    <div
-                      className="mb-4"
+                    <p
                       style={{
-                        background: 'var(--aku-yellow-soft)',
-                        borderLeft: '4px solid var(--aku-yellow)',
-                        borderRadius: 'var(--radius-md)',
-                        padding: 12,
                         fontSize: 13,
-                        color: 'var(--aku-ink)',
+                        color: 'var(--aku-muted)',
+                        marginBottom: 20,
                       }}
                     >
-                      Sign in to continue to <strong>{nextPath}</strong>.
-                    </div>
+                      Sign in to continue to <strong style={{ color: 'var(--aku-ink)' }}>{nextPath}</strong>.
+                    </p>
                   )}
 
                   {mode === 'reset' ? (
@@ -531,13 +503,11 @@ export default function Auth() {
                           >
                             New password
                           </label>
-                          <input
-                            type="password"
-                            className="form-control"
-                            placeholder="At least 8 characters"
+                          <PasswordInput
                             value={resetForm.password}
                             onChange={updateReset('password')}
-                            style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)' }}
+                            placeholder="At least 8 characters"
+                            autoComplete="new-password"
                           />
                         </div>
 
@@ -548,13 +518,11 @@ export default function Auth() {
                           >
                             Confirm new password
                           </label>
-                          <input
-                            type="password"
-                            className="form-control"
-                            placeholder="Type it again"
+                          <PasswordInput
                             value={resetForm.confirm}
                             onChange={updateReset('confirm')}
-                            style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)' }}
+                            placeholder="Type it again"
+                            autoComplete="new-password"
                           />
                         </div>
 
@@ -680,6 +648,7 @@ export default function Auth() {
                           placeholder={DEMO_EMAIL}
                           value={form.email}
                           onChange={update('email')}
+                          autoComplete="email"
                           style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)' }}
                         />
                       </div>
@@ -709,15 +678,13 @@ export default function Auth() {
                             </button>
                           )}
                         </div>
-                        <input
-                          type="password"
-                          className="form-control"
-                          placeholder={
-                            mode === 'signup' ? 'At least 8 characters' : '••••••••'
-                          }
+                        <PasswordInput
                           value={form.password}
                           onChange={update('password')}
-                          style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)' }}
+                          placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
+                          autoComplete={
+                            mode === 'signup' ? 'new-password' : 'current-password'
+                          }
                         />
                         {mode === 'signup' && (
                           <p

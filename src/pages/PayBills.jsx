@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Zap, Droplet, Wifi, Tv } from 'lucide-react';
 import Reveal from '../components/Reveal.jsx';
 import { useWallet } from '../context/WalletContext.jsx';
 
@@ -7,7 +8,7 @@ const categories = [
   {
     id: 'electricity',
     label: 'Electricity',
-    icon: '⚡',
+    Icon: Zap,
     biller: 'ECG Ghana',
     image:
       'https://images.unsplash.com/photo-1548337138-e87d889cc369?auto=format&fit=crop&w=600&q=80',
@@ -15,7 +16,7 @@ const categories = [
   {
     id: 'water',
     label: 'Water',
-    icon: '💧',
+    Icon: Droplet,
     biller: 'Ghana Water Co.',
     image:
       'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=600&q=80',
@@ -23,7 +24,7 @@ const categories = [
   {
     id: 'internet',
     label: 'Internet',
-    icon: '🌐',
+    Icon: Wifi,
     biller: 'Fibre Broadband',
     image:
       'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=600&q=80',
@@ -31,7 +32,7 @@ const categories = [
   {
     id: 'tv',
     label: 'TV',
-    icon: '📺',
+    Icon: Tv,
     biller: 'DSTV Ghana',
     image:
       'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?auto=format&fit=crop&w=600&q=80',
@@ -268,29 +269,20 @@ export default function PayBills() {
                 </div>
 
                 {balance === 0 && (
-                  <div
-                    className="mt-4 d-flex align-items-start gap-2"
+                  <p
                     style={{
-                      background: 'var(--aku-white)',
-                      border: '1px solid var(--aku-line)',
-                      borderLeft: '4px solid var(--aku-yellow)',
-                      borderRadius: 'var(--radius-md)',
-                      padding: 14,
+                      marginTop: 20,
+                      fontSize: 13,
+                      color: 'var(--aku-muted)',
                       maxWidth: 460,
                     }}
                   >
-                    <span style={{ fontSize: 18 }}>💡</span>
-                    <div style={{ fontSize: 14, color: 'var(--aku-ink)' }}>
-                      Your wallet is empty.{' '}
-                      <Link
-                        to="/wallet"
-                        style={{ color: 'var(--aku-blue)', fontWeight: 700 }}
-                      >
-                        Receive money
-                      </Link>{' '}
-                      first to pay your first bill.
-                    </div>
-                  </div>
+                    Wallet is empty.{' '}
+                    <Link to="/wallet" style={{ color: 'var(--aku-blue)', fontWeight: 600 }}>
+                      Receive money
+                    </Link>{' '}
+                    first to pay your first bill.
+                  </p>
                 )}
               </Reveal>
             </div>
@@ -330,42 +322,64 @@ export default function PayBills() {
           </Reveal>
 
           <Reveal group className="row g-4">
-            {categories.map((c) => (
-              <div className="col-6 col-md-3" key={c.id}>
-                <button
-                  type="button"
-                  onClick={() => pickCategory(c)}
-                  className="aku-card w-100 h-100 text-center"
-                  style={{
-                    padding: 0,
-                    overflow: 'hidden',
-                    border:
-                      category === c.id
-                        ? '3px solid var(--aku-blue)'
-                        : '3px solid transparent',
-                    transition: 'all var(--t-fast) var(--ease-out)',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <div style={{ height: 110, overflow: 'hidden' }}>
-                    <img src={c.image} alt={c.label} className="img-cover" loading="lazy" />
-                  </div>
-                  <div style={{ padding: '14px 10px' }}>
-                    <div style={{ fontSize: 22 }}>{c.icon}</div>
+            {categories.map((c) => {
+              const { Icon } = c;
+              return (
+                <div className="col-6 col-md-3" key={c.id}>
+                  <button
+                    type="button"
+                    onClick={() => pickCategory(c)}
+                    className="aku-card w-100 h-100 text-center"
+                    style={{
+                      padding: 0,
+                      overflow: 'hidden',
+                      border:
+                        category === c.id
+                          ? '3px solid var(--aku-blue)'
+                          : '3px solid transparent',
+                      transition: 'all var(--t-fast) var(--ease-out)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div style={{ height: 110, overflow: 'hidden' }}>
+                      <img src={c.image} alt={c.label} className="img-cover" loading="lazy" />
+                    </div>
                     <div
                       style={{
-                        fontSize: 14,
-                        fontWeight: 700,
-                        marginTop: 4,
-                        color: 'var(--aku-ink)',
+                        padding: '14px 10px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 6,
                       }}
                     >
-                      {c.label}
+                      <span
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 10,
+                          background: 'var(--aku-bg)',
+                          color: 'var(--aku-blue)',
+                          display: 'grid',
+                          placeItems: 'center',
+                        }}
+                      >
+                        <Icon size={16} strokeWidth={2.5} />
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 700,
+                          color: 'var(--aku-ink)',
+                        }}
+                      >
+                        {c.label}
+                      </span>
                     </div>
-                  </div>
-                </button>
-              </div>
-            ))}
+                  </button>
+                </div>
+              );
+            })}
           </Reveal>
         </div>
       </section>

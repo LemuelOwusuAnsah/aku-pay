@@ -237,29 +237,20 @@ export default function SendMoney() {
                 </div>
 
                 {balance === 0 && (
-                  <div
-                    className="mt-4 d-flex align-items-start gap-2"
+                  <p
                     style={{
-                      background: 'var(--aku-yellow-soft)',
-                      border: '1px solid var(--aku-line)',
-                      borderLeft: '4px solid var(--aku-yellow)',
-                      borderRadius: 'var(--radius-md)',
-                      padding: 14,
+                      marginTop: 20,
+                      fontSize: 13,
+                      color: 'var(--aku-muted)',
                       maxWidth: 460,
                     }}
                   >
-                    <span style={{ fontSize: 18 }}>💡</span>
-                    <div style={{ fontSize: 14, color: 'var(--aku-ink)' }}>
-                      Your wallet is empty.{' '}
-                      <Link
-                        to="/wallet"
-                        style={{ color: 'var(--aku-blue)', fontWeight: 700 }}
-                      >
-                        Receive money
-                      </Link>{' '}
-                      first to send your first transfer.
-                    </div>
-                  </div>
+                    Wallet is empty.{' '}
+                    <Link to="/wallet" style={{ color: 'var(--aku-blue)', fontWeight: 600 }}>
+                      Receive money
+                    </Link>{' '}
+                    first to send your first transfer.
+                  </p>
                 )}
               </Reveal>
             </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowRight, Check, Plus, ArrowUpRight, ArrowDown, ArrowUp } from 'lucide-react';
 import Reveal from '../components/Reveal.jsx';
 import { useWallet } from '../context/WalletContext.jsx';
 
@@ -8,7 +9,7 @@ const quickActions = [
     key: 'send',
     to: '/send',
     label: 'Send money',
-    icon: '→',
+    Icon: ArrowRight,
     image:
       'https://images.unsplash.com/photo-1556742393-d75f468bfcb0?auto=format&fit=crop&w=600&q=80',
   },
@@ -16,14 +17,14 @@ const quickActions = [
     key: 'bills',
     to: '/bills',
     label: 'Pay bill',
-    icon: '✓',
+    Icon: Check,
     image:
       'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=600&q=80',
   },
   {
     key: 'receive',
     label: 'Receive money',
-    icon: '+',
+    Icon: Plus,
     image:
       'https://images.unsplash.com/photo-1601597111158-2fceff292cdc?auto=format&fit=crop&w=600&q=80',
   },
@@ -31,7 +32,7 @@ const quickActions = [
     key: 'history',
     to: '/transactions',
     label: 'History',
-    icon: '↗',
+    Icon: ArrowUpRight,
     image:
       'https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&fit=crop&w=600&q=80',
   },
@@ -247,6 +248,7 @@ export default function Wallet() {
 
           <Reveal group className="row g-4 mt-2">
             {quickActions.map((q) => {
+              const { Icon } = q;
               const content = (
                 <>
                   <div style={{ height: 96, overflow: 'hidden', position: 'relative' }}>
@@ -271,11 +273,9 @@ export default function Wallet() {
                         color: '#0B132B',
                         display: 'grid',
                         placeItems: 'center',
-                        fontWeight: 700,
-                        fontSize: 16,
                       }}
                     >
-                      {q.icon}
+                      <Icon size={18} strokeWidth={2.5} />
                     </div>
                   </div>
                   <div
@@ -355,10 +355,9 @@ export default function Wallet() {
                           display: 'grid',
                           placeItems: 'center',
                           margin: '0 auto 16px',
-                          fontSize: 24,
                         }}
                       >
-                        🧾
+                        <ArrowUpRight size={22} style={{ color: 'var(--aku-muted)' }} />
                       </div>
                       <p style={{ fontWeight: 600, color: 'var(--aku-ink)', marginBottom: 6 }}>
                         No transactions yet
@@ -368,63 +367,66 @@ export default function Wallet() {
                       </p>
                     </div>
                   ) : (
-                    recent.map((t, i) => (
-                      <div
-                        key={t.id}
-                        className="d-flex justify-content-between align-items-center py-3"
-                        style={{
-                          borderBottom:
-                            i === recent.length - 1 ? 'none' : '1px solid var(--aku-line)',
-                        }}
-                      >
-                        <div className="d-flex align-items-center gap-3">
-                          <div
-                            style={{
-                              width: 42,
-                              height: 42,
-                              borderRadius: 12,
-                              background:
-                                t.amount > 0 ? 'var(--aku-green-soft)' : 'var(--aku-blue-soft)',
-                              color:
-                                t.amount > 0 ? 'var(--aku-green-deep)' : 'var(--aku-blue)',
-                              display: 'grid',
-                              placeItems: 'center',
-                              fontWeight: 700,
-                            }}
-                          >
-                            {t.amount > 0 ? '↓' : '↑'}
-                          </div>
-                          <div>
-                            <div
-                              style={{
-                                fontWeight: 600,
-                                color: 'var(--aku-ink)',
-                                fontSize: 14,
-                              }}
-                            >
-                              {t.title}
-                            </div>
-                            <div style={{ fontSize: 12, color: 'var(--aku-muted)' }}>
-                              {new Date(t.date).toLocaleDateString(undefined, {
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </div>
-                          </div>
-                        </div>
+                    recent.map((t, i) => {
+                      const positive = t.amount > 0;
+                      const TIcon = positive ? ArrowDown : ArrowUp;
+                      return (
                         <div
+                          key={t.id}
+                          className="d-flex justify-content-between align-items-center py-3"
                           style={{
-                            fontWeight: 700,
-                            color: t.amount > 0 ? 'var(--aku-green)' : 'var(--aku-ink)',
+                            borderBottom:
+                              i === recent.length - 1 ? 'none' : '1px solid var(--aku-line)',
                           }}
                         >
-                          {t.amount > 0 ? '+' : '−'}
-                          {formatMoney(Math.abs(t.amount))}
+                          <div className="d-flex align-items-center gap-3">
+                            <div
+                              style={{
+                                width: 42,
+                                height: 42,
+                                borderRadius: 12,
+                                background: positive
+                                  ? 'var(--aku-green-soft)'
+                                  : 'var(--aku-blue-soft)',
+                                color: positive ? 'var(--aku-green-deep)' : 'var(--aku-blue)',
+                                display: 'grid',
+                                placeItems: 'center',
+                              }}
+                            >
+                              <TIcon size={18} strokeWidth={2.5} />
+                            </div>
+                            <div>
+                              <div
+                                style={{
+                                  fontWeight: 600,
+                                  color: 'var(--aku-ink)',
+                                  fontSize: 14,
+                                }}
+                              >
+                                {t.title}
+                              </div>
+                              <div style={{ fontSize: 12, color: 'var(--aku-muted)' }}>
+                                {new Date(t.date).toLocaleDateString(undefined, {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            style={{
+                              fontWeight: 700,
+                              color: positive ? 'var(--aku-green)' : 'var(--aku-ink)',
+                            }}
+                          >
+                            {positive ? '+' : '−'}
+                            {formatMoney(Math.abs(t.amount))}
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </Reveal>

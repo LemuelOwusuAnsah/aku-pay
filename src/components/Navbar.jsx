@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Moon, Sun, Menu, X, ChevronDown, Wallet, Clock, UserPlus, LogOut } from 'lucide-react';
 import CurrencyPicker from './CurrencyPicker.jsx';
 import { useWallet } from '../context/WalletContext.jsx';
 
@@ -134,11 +135,10 @@ export default function Navbar() {
               border: '1px solid var(--aku-line)',
               display: 'grid',
               placeItems: 'center',
-              fontSize: 16,
               color: 'var(--aku-ink)',
             }}
           >
-            {theme === 'dark' ? '☀' : '☾'}
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </button>
 
           {user ? (
@@ -153,7 +153,7 @@ export default function Navbar() {
                   alignItems: 'center',
                   gap: 8,
                   height: 38,
-                  padding: '0 12px 0 6px',
+                  padding: '0 10px 0 6px',
                   borderRadius: 12,
                   background: 'var(--aku-bg)',
                   border: '1px solid var(--aku-line)',
@@ -178,16 +178,14 @@ export default function Navbar() {
                   {firstName.charAt(0).toUpperCase()}
                 </span>
                 <span>Hi, {firstName}</span>
-                <span
+                <ChevronDown
+                  size={14}
                   style={{
-                    fontSize: 10,
                     color: 'var(--aku-muted)',
                     transform: userMenuOpen ? 'rotate(180deg)' : 'none',
                     transition: 'transform var(--t-fast) var(--ease-out)',
                   }}
-                >
-                  ▾
-                </span>
+                />
               </button>
 
               {userMenuOpen && (
@@ -197,7 +195,7 @@ export default function Navbar() {
                     position: 'absolute',
                     top: 'calc(100% + 8px)',
                     right: 0,
-                    minWidth: 200,
+                    minWidth: 220,
                     background: 'var(--aku-white)',
                     border: '1px solid var(--aku-line)',
                     borderRadius: 'var(--radius-md)',
@@ -216,9 +214,7 @@ export default function Navbar() {
                     <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--aku-ink)' }}>
                       {user.name}
                     </div>
-                    <div style={{ fontSize: 12, color: 'var(--aku-muted)' }}>
-                      {user.email}
-                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--aku-muted)' }}>{user.email}</div>
                   </div>
 
                   <Link
@@ -226,13 +222,16 @@ export default function Navbar() {
                     onClick={() => setUserMenuOpen(false)}
                     role="menuitem"
                     style={{
-                      display: 'block',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
                       padding: '10px 12px',
                       borderRadius: 10,
                       fontSize: 14,
                       color: 'var(--aku-ink)',
                     }}
                   >
+                    <Wallet size={15} style={{ color: 'var(--aku-muted)' }} />
                     My wallet
                   </Link>
 
@@ -241,21 +240,47 @@ export default function Navbar() {
                     onClick={() => setUserMenuOpen(false)}
                     role="menuitem"
                     style={{
-                      display: 'block',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
                       padding: '10px 12px',
                       borderRadius: 10,
                       fontSize: 14,
                       color: 'var(--aku-ink)',
                     }}
                   >
+                    <Clock size={15} style={{ color: 'var(--aku-muted)' }} />
                     History
                   </Link>
+
+                  <Link
+                    to="/auth?mode=signup&add=1"
+                    onClick={() => setUserMenuOpen(false)}
+                    role="menuitem"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '10px 12px',
+                      borderRadius: 10,
+                      fontSize: 14,
+                      color: 'var(--aku-ink)',
+                    }}
+                  >
+                    <UserPlus size={15} style={{ color: 'var(--aku-muted)' }} />
+                    Add another account
+                  </Link>
+
+                  <div style={{ height: 1, background: 'var(--aku-line)', margin: '6px 0' }} />
 
                   <button
                     onClick={handleSignOut}
                     role="menuitem"
                     className="w-100 text-start"
                     style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
                       padding: '10px 12px',
                       borderRadius: 10,
                       fontSize: 14,
@@ -264,6 +289,7 @@ export default function Navbar() {
                       background: 'transparent',
                     }}
                   >
+                    <LogOut size={15} />
                     Sign out
                   </button>
                 </div>
@@ -299,10 +325,11 @@ export default function Navbar() {
               background: 'var(--aku-bg)',
               border: '1px solid var(--aku-line)',
               color: 'var(--aku-ink)',
-              fontSize: 18,
+              display: 'grid',
+              placeItems: 'center',
             }}
           >
-            {menuOpen ? '✕' : '☰'}
+            {menuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </div>
@@ -342,6 +369,13 @@ export default function Navbar() {
                   <div style={{ fontWeight: 700, color: 'var(--aku-ink)' }}>{user.name}</div>
                   <div style={{ color: 'var(--aku-muted)' }}>{user.email}</div>
                 </div>
+                <Link
+                  to="/auth?mode=signup&add=1"
+                  onClick={() => setMenuOpen(false)}
+                  className="aku-btn aku-btn-ghost w-100"
+                >
+                  Add another account
+                </Link>
                 <button
                   onClick={handleSignOut}
                   className="aku-btn aku-btn-ghost w-100"

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { ChevronDown, Check } from 'lucide-react';
 import { useWallet } from '../context/WalletContext.jsx';
 
 export default function CurrencyPicker() {
@@ -36,7 +37,7 @@ export default function CurrencyPicker() {
           alignItems: 'center',
           gap: 6,
           height: 38,
-          padding: '0 12px',
+          padding: '0 10px',
           borderRadius: 12,
           background: 'var(--aku-bg)',
           border: '1px solid var(--aku-line)',
@@ -47,16 +48,14 @@ export default function CurrencyPicker() {
       >
         <span style={{ fontSize: 15 }}>{currencyInfo.symbol}</span>
         <span>{currency}</span>
-        <span
+        <ChevronDown
+          size={14}
           style={{
-            fontSize: 10,
             color: 'var(--aku-muted)',
             transform: open ? 'rotate(180deg)' : 'none',
             transition: 'transform var(--t-fast) var(--ease-out)',
           }}
-        >
-          ▾
-        </span>
+        />
       </button>
 
       {open && (
@@ -124,9 +123,7 @@ export default function CurrencyPicker() {
                     <span style={{ fontSize: 12, color: 'var(--aku-muted)' }}>{c.name}</span>
                   </span>
                 </span>
-                {active && (
-                  <span style={{ color: 'var(--aku-blue)', fontWeight: 700 }}>✓</span>
-                )}
+                {active && <Check size={16} style={{ color: 'var(--aku-blue)' }} />}
               </button>
             );
           })}

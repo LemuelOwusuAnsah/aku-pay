@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowUp, ArrowDown, Check, Receipt } from 'lucide-react';
 import Reveal from '../components/Reveal.jsx';
 import { useWallet } from '../context/WalletContext.jsx';
 
@@ -11,9 +12,9 @@ const filters = [
 ];
 
 const icons = {
-  sent: { glyph: '↑', bg: 'var(--aku-blue-soft)', color: 'var(--aku-blue)' },
-  received: { glyph: '↓', bg: 'var(--aku-green-soft)', color: 'var(--aku-green-deep)' },
-  bill: { glyph: '✓', bg: 'var(--aku-yellow-soft)', color: 'var(--aku-yellow-deep)' },
+  sent: { Icon: ArrowUp, bg: 'var(--aku-blue-soft)', color: 'var(--aku-blue)' },
+  received: { Icon: ArrowDown, bg: 'var(--aku-green-soft)', color: 'var(--aku-green-deep)' },
+  bill: { Icon: Check, bg: 'var(--aku-yellow-soft)', color: 'var(--aku-yellow-deep)' },
 };
 
 function formatDate(iso) {
@@ -207,10 +208,10 @@ export default function Transactions() {
                     display: 'grid',
                     placeItems: 'center',
                     margin: '0 auto 20px',
-                    fontSize: 30,
+                    color: 'var(--aku-muted)',
                   }}
                 >
-                  🧾
+                  <Receipt size={28} />
                 </div>
                 <h3 style={{ fontWeight: 800, color: 'var(--aku-ink)' }}>
                   No transactions yet
@@ -242,7 +243,8 @@ export default function Transactions() {
                 </div>
               ) : (
                 visible.map((t, i) => {
-                  const ic = icons[t.type] || icons.sent;
+                  const entry = icons[t.type] || icons.sent;
+                  const { Icon } = entry;
                   return (
                     <Reveal key={t.id} delay={i * 40}>
                       <div
@@ -258,15 +260,13 @@ export default function Transactions() {
                               width: 44,
                               height: 44,
                               borderRadius: 12,
-                              background: ic.bg,
-                              color: ic.color,
+                              background: entry.bg,
+                              color: entry.color,
                               display: 'grid',
                               placeItems: 'center',
-                              fontWeight: 700,
-                              fontSize: 17,
                             }}
                           >
-                            {ic.glyph}
+                            <Icon size={18} strokeWidth={2.5} />
                           </div>
                           <div>
                             <div
