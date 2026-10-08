@@ -114,14 +114,32 @@ export default function Transactions() {
         <div className="aku-container">
           <Reveal group className="row g-3 mb-5">
             <div className="col-6 col-md-4">
-              <div className="aku-card" style={{ borderLeft: '4px solid var(--aku-green)' }}>
-                <div style={{ fontSize: 13, color: 'var(--aku-muted)' }}>Money in</div>
+              <div
+                style={{
+                  background: 'var(--aku-green-soft)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: 24,
+                  height: '100%',
+                }}
+              >
                 <div
                   style={{
-                    fontSize: 26,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: 'var(--aku-green-deep)',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Money in
+                </div>
+                <div
+                  style={{
+                    fontSize: 32,
                     fontWeight: 800,
-                    color: 'var(--aku-green)',
-                    marginTop: 4,
+                    color: 'var(--aku-green-deep)',
+                    marginTop: 8,
+                    letterSpacing: -0.5,
                   }}
                 >
                   +{formatMoney(totalIn)}
@@ -129,14 +147,32 @@ export default function Transactions() {
               </div>
             </div>
             <div className="col-6 col-md-4">
-              <div className="aku-card" style={{ borderLeft: '4px solid var(--aku-blue)' }}>
-                <div style={{ fontSize: 13, color: 'var(--aku-muted)' }}>Money out</div>
+              <div
+                style={{
+                  background: 'var(--aku-blue-soft)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: 24,
+                  height: '100%',
+                }}
+              >
                 <div
                   style={{
-                    fontSize: 26,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: 'var(--aku-blue)',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Money out
+                </div>
+                <div
+                  style={{
+                    fontSize: 32,
                     fontWeight: 800,
-                    color: 'var(--aku-ink)',
-                    marginTop: 4,
+                    color: 'var(--aku-blue)',
+                    marginTop: 8,
+                    letterSpacing: -0.5,
                   }}
                 >
                   −{formatMoney(totalOut)}
@@ -144,14 +180,32 @@ export default function Transactions() {
               </div>
             </div>
             <div className="col-12 col-md-4">
-              <div className="aku-card" style={{ borderLeft: '4px solid var(--aku-yellow)' }}>
-                <div style={{ fontSize: 13, color: 'var(--aku-muted)' }}>Transactions</div>
+              <div
+                style={{
+                  background: 'var(--aku-yellow-soft)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: 24,
+                  height: '100%',
+                }}
+              >
                 <div
                   style={{
-                    fontSize: 26,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: 'var(--aku-yellow-deep)',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Transactions
+                </div>
+                <div
+                  style={{
+                    fontSize: 32,
                     fontWeight: 800,
-                    color: 'var(--aku-blue)',
-                    marginTop: 4,
+                    color: 'var(--aku-yellow-deep)',
+                    marginTop: 8,
+                    letterSpacing: -0.5,
                   }}
                 >
                   {transactions.length}

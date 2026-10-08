@@ -240,27 +240,65 @@ export default function PayBills() {
                 </p>
 
                 <div className="d-flex flex-wrap gap-3 mt-4">
-                  <div className="aku-card" style={{ padding: '14px 18px', minWidth: 130 }}>
-                    <div style={{ fontSize: 12, color: 'var(--aku-muted)' }}>Your balance</div>
+                  <div
+                    style={{
+                      background: 'var(--aku-white)',
+                      borderRadius: 'var(--radius-lg)',
+                      padding: '16px 20px',
+                      minWidth: 150,
+                      boxShadow: 'var(--shadow-sm)',
+                    }}
+                  >
                     <div
                       style={{
-                        fontSize: 20,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: 'var(--aku-muted)',
+                        textTransform: 'uppercase',
+                        letterSpacing: 0.5,
+                      }}
+                    >
+                      Balance
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 22,
                         fontWeight: 800,
                         color: 'var(--aku-blue)',
-                        marginTop: 2,
+                        marginTop: 6,
+                        letterSpacing: -0.3,
                       }}
                     >
                       {formatMoney(balance)}
                     </div>
                   </div>
-                  <div className="aku-card" style={{ padding: '14px 18px', minWidth: 130 }}>
-                    <div style={{ fontSize: 12, color: 'var(--aku-muted)' }}>Currency</div>
+                  <div
+                    style={{
+                      background: 'var(--aku-white)',
+                      borderRadius: 'var(--radius-lg)',
+                      padding: '16px 20px',
+                      minWidth: 150,
+                      boxShadow: 'var(--shadow-sm)',
+                    }}
+                  >
                     <div
                       style={{
-                        fontSize: 20,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: 'var(--aku-muted)',
+                        textTransform: 'uppercase',
+                        letterSpacing: 0.5,
+                      }}
+                    >
+                      Currency
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 22,
                         fontWeight: 800,
                         color: 'var(--aku-blue)',
-                        marginTop: 2,
+                        marginTop: 6,
+                        letterSpacing: -0.3,
                       }}
                     >
                       {currencyInfo.code} {currencyInfo.symbol}

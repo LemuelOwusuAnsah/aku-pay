@@ -12,42 +12,9 @@ const AUTHOR = {
 };
 
 const stats = [
-  { k: '6', v: 'pages shipped' },
+  { k: '9', v: 'pages shipped' },
   { k: '100%', v: 'mobile-ready' },
   { k: '0', v: 'fees on sends' },
-];
-
-const roadmap = [
-  {
-    tag: 'Live now',
-    colour: 'var(--aku-green)',
-    items: [
-      'Send money between users',
-      'Pay bills across 4 categories',
-      'Full transaction history',
-      'Sign in / sign up flow',
-    ],
-  },
-  {
-    tag: 'In progress',
-    colour: 'var(--aku-yellow)',
-    items: [
-      'Airtime & data top-up',
-      'Savings goals',
-      'Working transaction state',
-      'Real auth persistence',
-    ],
-  },
-  {
-    tag: 'Coming soon',
-    colour: 'var(--aku-blue)',
-    items: [
-      'PostgreSQL backend',
-      'Live API integration',
-      'Virtual debit cards',
-      'Mobile app (iOS / Android)',
-    ],
-  },
 ];
 
 export default function About() {
@@ -216,10 +183,7 @@ export default function About() {
           <div className="row g-5 mt-2 align-items-center">
             <div className="col-12 col-md-5">
               <Reveal direction="left">
-                <div
-                  className="aku-card text-center"
-                  style={{ padding: 32 }}
-                >
+                <div className="aku-card text-center" style={{ padding: 32 }}>
                   <img
                     src={logoSrc}
                     alt="Aku Pay"
@@ -249,109 +213,20 @@ export default function About() {
                   If you're building something similar — a wallet, a payments tool, or anything that moves money — I'd love to hear about it.
                 </p>
 
-                <div
-                  className="d-flex flex-column flex-sm-row flex-wrap gap-2 mt-4"
-                  style={{ fontSize: 14 }}
-                >
-                  <a
-                    href={`tel:${AUTHOR.phone}`}
-                    className="aku-btn aku-btn-ghost"
-                    style={{ padding: '10px 20px' }}
-                  >
+                <div className="d-flex flex-column flex-sm-row flex-wrap gap-2 mt-4" style={{ fontSize: 14 }}>
+                  <a href={`tel:${AUTHOR.phone}`} className="aku-btn aku-btn-ghost" style={{ padding: '10px 20px' }}>
                     ☎ {AUTHOR.phone}
                   </a>
-                  <a
-                    href={`mailto:${AUTHOR.emailPrimary}`}
-                    className="aku-btn aku-btn-ghost"
-                    style={{ padding: '10px 20px' }}
-                  >
+                  <a href={`mailto:${AUTHOR.emailPrimary}`} className="aku-btn aku-btn-ghost" style={{ padding: '10px 20px' }}>
                     ✉ {AUTHOR.emailPrimary}
                   </a>
-                  <a
-                    href={`mailto:${AUTHOR.emailProfessional}`}
-                    className="aku-btn aku-btn-primary"
-                    style={{ padding: '10px 20px' }}
-                  >
+                  <a href={`mailto:${AUTHOR.emailProfessional}`} className="aku-btn aku-btn-primary" style={{ padding: '10px 20px' }}>
                     Get in touch
                   </a>
                 </div>
               </Reveal>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="aku-section band-cream">
-        <div className="aku-container">
-          <Reveal>
-            <h2
-              style={{
-                fontSize: 30,
-                fontWeight: 800,
-                color: 'var(--aku-ink)',
-                textAlign: 'center',
-              }}
-            >
-              Where we're headed
-            </h2>
-            <p
-              style={{
-                color: 'var(--aku-muted)',
-                textAlign: 'center',
-                marginTop: 12,
-                marginBottom: 40,
-                maxWidth: 560,
-                marginLeft: 'auto',
-                marginRight: 'auto',
-              }}
-            >
-              Aku Pay is under active development. Here's what's done, what's next, and what's coming.
-            </p>
-          </Reveal>
-
-          <Reveal group className="row g-4">
-            {roadmap.map((col) => (
-              <div className="col-12 col-md-4" key={col.tag}>
-                <div className="aku-card h-100" style={{ borderTop: `4px solid ${col.colour}` }}>
-                  <span
-                    style={{
-                      background: col.colour,
-                      color: col.tag === 'In progress' ? '#0B132B' : 'white',
-                      padding: '4px 12px',
-                      borderRadius: 'var(--radius-pill)',
-                      fontSize: 12,
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: 0.5,
-                    }}
-                  >
-                    {col.tag}
-                  </span>
-                  <ul
-                    className="list-unstyled d-flex flex-column gap-2 mt-4"
-                    style={{ fontSize: 14 }}
-                  >
-                    {col.items.map((item) => (
-                      <li key={item} className="d-flex align-items-start gap-2">
-                        <span
-                          style={{
-                            width: 18,
-                            height: 18,
-                            borderRadius: '50%',
-                            background: col.colour,
-                            flexShrink: 0,
-                            marginTop: 4,
-                            opacity: 0.85,
-                          }}
-                        />
-                        <span style={{ color: 'var(--aku-ink)' }}>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ))}
-          </Reveal>
         </div>
       </section>
 

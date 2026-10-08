@@ -1,24 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Moon, Sun, Menu, X, ChevronDown, Wallet, Clock, UserPlus, LogOut } from 'lucide-react';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import {
+  Moon, Sun, Menu, X, ChevronDown,
+  Send, Receipt, Smartphone, PiggyBank, Clock,
+  Wallet as WalletIcon, CreditCard, User as UserIcon, UserPlus, LogOut,
+} from 'lucide-react';
 import CurrencyPicker from './CurrencyPicker.jsx';
 import { useWallet } from '../context/WalletContext.jsx';
 
-const links = [
-  { to: '/', label: 'Home' },
-  { to: '/wallet', label: 'Wallet' },
-  { to: '/send', label: 'Send' },
-  { to: '/bills', label: 'Bills' },
-  { to: '/transactions', label: 'History' },
-  { to: '/about', label: 'About' },
+const moneyMenu = [
+  { to: '/send', label: 'Send money', Icon: Send, desc: 'Transfer to any Aku Pay user' },
+  { to: '/bills', label: 'Pay bills', Icon: Receipt, desc: 'Electricity, water, internet, TV' },
+  { to: '/airtime', label: 'Airtime & data', Icon: Smartphone, desc: 'Top up any network' },
+  { to: '/savings', label: 'Savings goals', Icon: PiggyBank, desc: 'Save with a purpose' },
+  { to: '/transactions', label: 'History', Icon: Clock, desc: 'Every transaction' },
 ];
 
 export default function Navbar() {
   const { user, signOut } = useWallet();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [moneyOpen, setMoneyOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window === 'undefined') return 'light';
@@ -26,6 +31,7 @@ export default function Navbar() {
   });
 
   const userMenuRef = useRef(null);
+  const moneyRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -46,14 +52,26 @@ export default function Navbar() {
   }, [theme]);
 
   useEffect(() => {
-    if (!userMenuOpen) return;
+    setMoneyOpen(false);
+    setUserMenuOpen(false);
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!userMenuOpen && !moneyOpen) return;
     const onClick = (e) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
         setUserMenuOpen(false);
       }
+      if (moneyRef.current && !moneyRef.current.contains(e.target)) {
+        setMoneyOpen(false);
+      }
     };
     const onEsc = (e) => {
-      if (e.key === 'Escape') setUserMenuOpen(false);
+      if (e.key === 'Escape') {
+        setUserMenuOpen(false);
+        setMoneyOpen(false);
+      }
     };
     document.addEventListener('mousedown', onClick);
     document.addEventListener('keydown', onEsc);
@@ -61,7 +79,7 @@ export default function Navbar() {
       document.removeEventListener('mousedown', onClick);
       document.removeEventListener('keydown', onEsc);
     };
-  }, [userMenuOpen]);
+  }, [userMenuOpen, moneyOpen]);
 
   const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
 
@@ -91,6 +109,7 @@ export default function Navbar() {
     borderBottom: isActive ? '2px solid var(--aku-yellow)' : '2px solid transparent',
   });
 
+  const moneyActive = moneyMenu.some((m) => location.pathname === m.to);
   const firstName = user?.name?.split(' ')[0] || 'there';
 
   return (
@@ -113,11 +132,97 @@ export default function Navbar() {
         </Link>
 
         <nav className="d-none d-md-flex align-items-center gap-4">
-          {links.map((link) => (
-            <NavLink key={link.to} to={link.to} style={linkStyle} end={link.to === '/'}>
-              {link.label}
-            </NavLink>
-          ))}
+          <NavLink to="/" style={linkStyle} end>
+            Home
+          </NavLink>
+
+          <div ref={moneyRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => setMoneyOpen((v) => !v)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                background: 'transparent',
+                border: 'none',
+                padding: '6px 4px',
+                fontSize: 15,
+                fontWeight: 500,
+                color: moneyActive ? 'var(--aku-blue)' : 'var(--aku-muted)',
+                borderBottom: moneyActive
+                  ? '2px solid var(--aku-yellow)'
+                  : '2px solid transparent',
+              }}
+            >
+              Pay & Save
+              <ChevronDown
+                size={13}
+                style={{
+                  transform: moneyOpen ? 'rotate(180deg)' : 'none',
+                  transition: 'transform var(--t-fast) var(--ease-out)',
+                }}
+              />
+            </button>
+
+            {moneyOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 14px)',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  minWidth: 300,
+                  background: 'var(--aku-white)',
+                  border: '1px solid var(--aku-line)',
+                  borderRadius: 'var(--radius-md)',
+                  boxShadow: 'var(--shadow-lg)',
+                  padding: 6,
+                  zIndex: 1100,
+                }}
+              >
+                {moneyMenu.map(({ to, label, Icon, desc }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    onClick={() => setMoneyOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '10px 12px',
+                      borderRadius: 10,
+                      color: 'var(--aku-ink)',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--aku-bg)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    <span
+                      style={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: 10,
+                        background: 'var(--aku-blue-soft)',
+                        color: 'var(--aku-blue)',
+                        display: 'grid',
+                        placeItems: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Icon size={15} />
+                    </span>
+                    <span className="d-flex flex-column">
+                      <span style={{ fontSize: 14, fontWeight: 600 }}>{label}</span>
+                      <span style={{ fontSize: 12, color: 'var(--aku-muted)' }}>{desc}</span>
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <NavLink to="/about" style={linkStyle}>
+            About
+          </NavLink>
         </nav>
 
         <div className="d-flex align-items-center gap-2">
@@ -126,7 +231,6 @@ export default function Navbar() {
           <button
             onClick={toggleTheme}
             aria-label="Toggle dark mode"
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             style={{
               width: 38,
               height: 38,
@@ -145,9 +249,6 @@ export default function Navbar() {
             <div ref={userMenuRef} className="d-none d-sm-block" style={{ position: 'relative' }}>
               <button
                 onClick={() => setUserMenuOpen((v) => !v)}
-                aria-label="Account menu"
-                aria-haspopup="menu"
-                aria-expanded={userMenuOpen}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -190,12 +291,11 @@ export default function Navbar() {
 
               {userMenuOpen && (
                 <div
-                  role="menu"
                   style={{
                     position: 'absolute',
                     top: 'calc(100% + 8px)',
                     right: 0,
-                    minWidth: 220,
+                    minWidth: 230,
                     background: 'var(--aku-white)',
                     border: '1px solid var(--aku-line)',
                     borderRadius: 'var(--radius-md)',
@@ -217,46 +317,33 @@ export default function Navbar() {
                     <div style={{ fontSize: 12, color: 'var(--aku-muted)' }}>{user.email}</div>
                   </div>
 
-                  <Link
-                    to="/wallet"
-                    onClick={() => setUserMenuOpen(false)}
-                    role="menuitem"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                      padding: '10px 12px',
-                      borderRadius: 10,
-                      fontSize: 14,
-                      color: 'var(--aku-ink)',
-                    }}
-                  >
-                    <Wallet size={15} style={{ color: 'var(--aku-muted)' }} />
-                    My wallet
-                  </Link>
-
-                  <Link
-                    to="/transactions"
-                    onClick={() => setUserMenuOpen(false)}
-                    role="menuitem"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                      padding: '10px 12px',
-                      borderRadius: 10,
-                      fontSize: 14,
-                      color: 'var(--aku-ink)',
-                    }}
-                  >
-                    <Clock size={15} style={{ color: 'var(--aku-muted)' }} />
-                    History
-                  </Link>
+                  {[
+                    { to: '/wallet', label: 'My wallet', Icon: WalletIcon },
+                    { to: '/card', label: 'Virtual card', Icon: CreditCard },
+                    { to: '/profile', label: 'Profile', Icon: UserIcon },
+                  ].map(({ to, label, Icon }) => (
+                    <Link
+                      key={to}
+                      to={to}
+                      onClick={() => setUserMenuOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        padding: '10px 12px',
+                        borderRadius: 10,
+                        fontSize: 14,
+                        color: 'var(--aku-ink)',
+                      }}
+                    >
+                      <Icon size={15} style={{ color: 'var(--aku-muted)' }} />
+                      {label}
+                    </Link>
+                  ))}
 
                   <Link
                     to="/auth?mode=signup&add=1"
                     onClick={() => setUserMenuOpen(false)}
-                    role="menuitem"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -275,7 +362,6 @@ export default function Navbar() {
 
                   <button
                     onClick={handleSignOut}
-                    role="menuitem"
                     className="w-100 text-start"
                     style={{
                       display: 'flex',
@@ -344,38 +430,53 @@ export default function Navbar() {
           }}
         >
           <div className="aku-container d-flex flex-column gap-3">
-            {links.map((link) => (
+            <NavLink to="/" onClick={() => setMenuOpen(false)} style={linkStyle} end>
+              Home
+            </NavLink>
+
+            <div style={{ fontSize: 11, color: 'var(--aku-muted)', textTransform: 'uppercase', letterSpacing: 1, marginTop: 8 }}>
+              Pay & Save
+            </div>
+            {moneyMenu.map(({ to, label, Icon }) => (
               <NavLink
-                key={link.to}
-                to={link.to}
+                key={to}
+                to={to}
                 onClick={() => setMenuOpen(false)}
                 style={linkStyle}
-                end={link.to === '/'}
               >
-                {link.label}
+                <span className="d-flex align-items-center gap-2">
+                  <Icon size={15} style={{ color: 'var(--aku-muted)' }} />
+                  {label}
+                </span>
               </NavLink>
             ))}
 
+            <NavLink to="/about" onClick={() => setMenuOpen(false)} style={linkStyle}>
+              About
+            </NavLink>
+
             {user ? (
-              <div className="d-flex flex-column gap-2 pt-2">
-                <div
-                  style={{
-                    background: 'var(--aku-bg)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: 12,
-                    fontSize: 13,
-                  }}
-                >
-                  <div style={{ fontWeight: 700, color: 'var(--aku-ink)' }}>{user.name}</div>
-                  <div style={{ color: 'var(--aku-muted)' }}>{user.email}</div>
+              <>
+                <div style={{ fontSize: 11, color: 'var(--aku-muted)', textTransform: 'uppercase', letterSpacing: 1, marginTop: 8 }}>
+                  Account
                 </div>
-                <Link
-                  to="/auth?mode=signup&add=1"
-                  onClick={() => setMenuOpen(false)}
-                  className="aku-btn aku-btn-ghost w-100"
-                >
-                  Add another account
-                </Link>
+                {[
+                  { to: '/wallet', label: 'My wallet', Icon: WalletIcon },
+                  { to: '/card', label: 'Virtual card', Icon: CreditCard },
+                  { to: '/profile', label: 'Profile', Icon: UserIcon },
+                ].map(({ to, label, Icon }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    onClick={() => setMenuOpen(false)}
+                    style={linkStyle}
+                  >
+                    <span className="d-flex align-items-center gap-2">
+                      <Icon size={15} style={{ color: 'var(--aku-muted)' }} />
+                      {label}
+                    </span>
+                  </NavLink>
+                ))}
                 <button
                   onClick={handleSignOut}
                   className="aku-btn aku-btn-ghost w-100"
@@ -383,7 +484,7 @@ export default function Navbar() {
                 >
                   Sign out
                 </button>
-              </div>
+              </>
             ) : (
               <div className="d-flex gap-2 pt-2">
                 <Link
