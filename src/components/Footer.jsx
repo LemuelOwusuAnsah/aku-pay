@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Facebook, Linkedin, Twitter } from 'lucide-react';
+import { Users, Globe, Mail } from "lucide-react";
 import { useWallet } from '../context/WalletContext.jsx';
 
 const productLinks = [
@@ -18,9 +18,9 @@ const companyLinks = [
 ];
 
 const socials = [
-  { Icon: Facebook, label: 'Facebook' },
-  { Icon: Linkedin, label: 'LinkedIn' },
-  { Icon: Twitter, label: 'Twitter' },
+  { Icon: Users, label: "Community" },
+  { Icon: Globe, label: "Website" },
+  { Icon: Mail, label: "Email" },
 ];
 
 const AUTHOR = {
