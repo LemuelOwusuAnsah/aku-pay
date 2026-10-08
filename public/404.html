@@ -2,33 +2,179 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Aku Pay</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page not found — Aku Pay</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="robots" content="noindex" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --aku-yellow: #FFD100;
+        --aku-blue: #0A3D91;
+        --aku-blue-light: #1E5BC6;
+        --aku-green: #00A86B;
+        --aku-ink: #0B132B;
+        --aku-muted: #5A6478;
+        --aku-bg: #F7F9FC;
+        --aku-white: #FFFFFF;
+        --aku-line: #E6EAF2;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { height: 100%; }
+      body {
+        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        background: var(--aku-bg);
+        color: var(--aku-ink);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        -webkit-font-smoothing: antialiased;
+      }
+      .card {
+        background: var(--aku-white);
+        border-radius: 28px;
+        padding: 48px 40px;
+        max-width: 520px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 20px 40px -12px rgba(11, 19, 43, 0.15);
+        animation: fadeUp 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+      }
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 32px;
+      }
+      .logo img { width: 40px; height: 40px; }
+      .logo span {
+        font-weight: 800;
+        font-size: 22px;
+        color: var(--aku-blue);
+      }
+      .logo span em {
+        font-style: normal;
+        color: var(--aku-green);
+      }
+      .code {
+        font-size: 96px;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -4px;
+        background: linear-gradient(135deg, var(--aku-blue) 0%, var(--aku-green) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 16px;
+      }
+      h1 {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--aku-ink);
+        margin-bottom: 12px;
+      }
+      p {
+        color: var(--aku-muted);
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 32px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 12px 24px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 15px;
+        text-decoration: none;
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+      .btn:hover { transform: translateY(-1px); }
+      .btn-primary {
+        background: var(--aku-blue);
+        color: white;
+      }
+      .btn-primary:hover { background: var(--aku-blue-light); }
+      .btn-yellow {
+        background: var(--aku-yellow);
+        color: var(--aku-ink);
+      }
+      .footer {
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid var(--aku-line);
+        font-size: 12px;
+        color: var(--aku-muted);
+      }
+      .footer a {
+        color: var(--aku-blue);
+        font-weight: 600;
+        text-decoration: none;
+      }
+    </style>
     <script>
       (function () {
-        var segmentCount = 1;
-        var l = window.location;
-        var basePath = '/aku-pay/';
-        var path = l.pathname;
-
-        if (path.indexOf(basePath) === 0) {
-          path = path.slice(basePath.length - 1);
-        }
-
-        l.replace(
-          l.protocol +
-            '//' +
-            l.hostname +
-            (l.port ? ':' + l.port : '') +
-            basePath +
-            '?/' +
-            path.replace(/^\//, '').replace(/\/$/, '') +
-            (l.search ? '&' + l.search.slice(1) : '') +
-            l.hash
-        );
+        var redirect = function () {
+          var basePath = '/';
+          var l = window.location;
+          l.replace(
+            l.protocol +
+              '//' +
+              l.hostname +
+              (l.port ? ':' + l.port : '') +
+              basePath +
+              '?/' +
+              l.pathname.slice(1) +
+              (l.search ? '&' + l.search.slice(1) : '') +
+              l.hash
+          );
+        };
+        // Give the user a moment to see the 404, then bounce them back to the SPA
+        setTimeout(redirect, 3000);
       })();
     </script>
   </head>
   <body>
-    <p>Redirecting…</p>
+    <div class="card">
+      <div class="logo">
+        <img src="/logo.svg" alt="Aku Pay" />
+        <span>Aku<em>Pay</em></span>
+      </div>
+
+      <div class="code">404</div>
+      <h1>Page not found</h1>
+      <p>
+        That link doesn't exist — or it moved. We're taking you back to the app in a moment.
+      </p>
+
+      <div class="actions">
+        <a href="/" class="btn btn-primary">Go to home</a>
+        <a href="/wallet" class="btn btn-yellow">Open wallet</a>
+      </div>
+
+      <div class="footer">
+        Need help? Contact <a href="mailto:hello@lemuelowusuansah.org">hello@lemuelowusuansah.org</a>
+      </div>
+    </div>
   </body>
 </html>
